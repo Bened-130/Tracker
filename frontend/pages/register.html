@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register Student - SchoolVibe AI</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-slate-900 text-white min-h-screen">
+    <video class="video-bg" autoplay muted loop playsinline>
+        <source src="https://assets.mixkit.co/videos/preview/mixkit-digital-animation-of-a-blue-network-of-connections-29358-large.mp4" type="video/mp4">
+    </video>
+    <div class="fixed inset-0 grid-bg pointer-events-none z-0"></div>
+
+    <nav class="glass-strong sticky top-0 z-40 px-6 py-4">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <a href="../index.html" class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
+                    <i data-lucide="scan-face" class="w-6 h-6 text-white"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold gradient-text">SchoolVibe AI</h1>
+                </div>
+            </a>
+            <div class="flex items-center gap-4">
+                <a href="dashboard.html" class="nav-btn glass px-4 py-2 rounded-lg hover:bg-white/10 text-sm font-medium">Dashboard</a>
+                <a href="register.html" class="nav-btn glass px-4 py-2 rounded-lg bg-indigo-600/30 text-sm font-medium">Register</a>
+                <a href="checkin.html" class="nav-btn glass px-4 py-2 rounded-lg hover:bg-white/10 text-sm font-medium">Check-in</a>
+                <a href="reports.html" class="nav-btn glass px-4 py-2 rounded-lg hover:bg-white/10 text-sm font-medium">Reports</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="relative z-10 max-w-4xl mx-auto p-6">
+        <div class="glass-card rounded-2xl p-8">
+            <h2 class="text-3xl font-bold mb-2 gradient-text">Student Registration</h2>
+            <p class="text-gray-400 mb-8">Enroll new students with facial recognition. Capture 5+ photos from different angles.</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">First Name</label>
+                        <input type="text" id="regFirstName" class="w-full glass bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-500 transition-all" placeholder="John">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Last Name</label>
+                        <input type="text" id="regLastName" class="w-full glass bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-500 transition-all" placeholder="Doe">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Email</label>
+                        <input type="email" id="regEmail" class="w-full glass bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-500 transition-all" placeholder="john.doe@school.edu">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Class</label>
+                        <select id="regClass" class="w-full glass bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-500 transition-all">
+                            <option value="">Select Class</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="relative">
+                    <div class="relative rounded-2xl overflow-hidden bg-black/50 aspect-video border-2 border-indigo-500/30">
+                        <video id="regVideo" class="w-full h-full object-cover" autoplay muted playsinline></video>
+                        <canvas id="regCanvas" class="absolute inset-0 w-full h-full"></canvas>
+                        <div id="regScanLine" class="scan-line hidden"></div>
+                        
+                        <div class="absolute bottom-4 left-4 right-4 flex justify-between items-center">
+                            <div class="glass px-3 py-1 rounded-full text-xs">
+                                <span id="captureCount">0</span>/5 Captured
+                            </div>
+                            <div id="regStatus" class="glass px-3 py-1 rounded-full text-xs text-yellow-400">
+                                Position face in frame
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 flex gap-3">
+                        <button onclick="startRegistrationCamera()" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 rounded-xl transition-all flex items-center justify-center gap-2">
+                            <i data-lucide="camera" class="w-5 h-5"></i>
+                            Start Camera
+                        </button>
+                        <button onclick="capturePhoto()" id="captureBtn" disabled class="flex-1 bg-gray-700 text-gray-400 font-semibold py-3 rounded-xl transition-all flex items-center justify-center gap-2 cursor-not-allowed">
+                            <i data-lucide="aperture" class="w-5 h-5"></i>
+                            Capture
+                        </button>
+                    </div>
+                    
+                    <div id="photoPreview" class="mt-4 grid grid-cols-5 gap-2"></div>
+                </div>
+            </div>
+            
+            <div class="mt-8 flex justify-end">
+                <button onclick="submitRegistration()" id="submitRegBtn" disabled class="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-bold py-4 px-8 rounded-xl transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center gap-2">
+                    <i data-lucide="save" class="w-5 h-5"></i>
+                    Complete Registration
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <div id="toastContainer" class="fixed bottom-6 right-6 z-50 space-y-3"></div>
+
+    <script src="../js/api.js"></script>
+    <script src="../js/faceRecognition.js"></script>
+    <script src="../js/camera.js"></script>
+    <script src="../js/registration.js"></script>
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+</html>
