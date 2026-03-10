@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports - SchoolVibe AI</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="bg-slate-900 text-white min-h-screen">
+    <video class="video-bg" autoplay muted loop playsinline>
+        <source src="https://assets.mixkit.co/videos/preview/mixkit-digital-animation-of-a-blue-network-of-connections-29358-large.mp4" type="video/mp4">
+    </video>
+    <div class="fixed inset-0 grid-bg pointer-events-none z-0"></div>
+
+    <nav class="glass-strong sticky top-0 z-40 px-6 py-4">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <a href="../index.html" class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
+                    <i data-lucide="scan-face" class="w-6 h-6 text-white"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold gradient-text">SchoolVibe AI</h1>
+                </div>
+            </a>
+            <div class="flex items-center gap-4">
+                <a href="dashboard.html" class="nav-btn glass px-4 py-2 rounded-lg hover:bg-white/10 text-sm font-medium">Dashboard</a>
+                <a href="register.html" class="nav-btn glass px-4 py-2 rounded-lg hover:bg-white/10 text-sm font-medium">Register</a>
+                <a href="checkin.html" class="nav-btn glass px-4 py-2 rounded-lg hover:bg-white/10 text-sm font-medium">Check-in</a>
+                <a href="reports.html" class="nav-btn glass px-4 py-2 rounded-lg bg-indigo-600/30 text-sm font-medium">Reports</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="relative z-10 max-w-7xl mx-auto p-6 space-y-6">
+        <div class="glass-card rounded-2xl p-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                <div>
+                    <h2 class="text-2xl font-bold gradient-text">Attendance Reports</h2>
+                    <p class="text-gray-400 text-sm">Generate detailed attendance analytics</p>
+                </div>
+                <div class="flex gap-3">
+                    <button onclick="exportCSV()" class="glass hover:bg-white/10 text-white font-medium py-2 px-4 rounded-lg transition-all flex items-center gap-2">
+                        <i data-lucide="download" class="w-4 h-4"></i>
+                        Export CSV
+                    </button>
+                    <button onclick="refreshReports()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2 px-4 rounded-lg transition-all flex items-center gap-2">
+                        <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                        Refresh
+                    </button>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                <select id="reportClass" class="glass bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-500">
+                    <option value="all">All Classes</option>
+                </select>
+                <select id="reportType" class="glass bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-500">
+                    <option value="daily">Daily Report</option>
+                    <option value="roster">Class Roster</option>
+                    <option value="monthly">Monthly Average</option>
+                </select>
+                <input type="date" id="reportStart" class="glass bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-500">
+                <input type="date" id="reportEnd" class="glass bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-500">
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="border-b border-white/10">
+                            <th class="py-3 px-4 text-sm font-medium text-gray-400">Class</th>
+                            <th class="py-3 px-4 text-sm font-medium text-gray-400">Date</th>
+                            <th class="py-3 px-4 text-sm font-medium text-gray-400">Total</th>
+                            <th class="py-3 px-4 text-sm font-medium text-gray-400">Present</th>
+                            <th class="py-3 px-4 text-sm font-medium text-gray-400">Absent</th>
+                            <th class="py-3 px-4 text-sm font-medium text-gray-400">Late</th>
+                            <th class="py-3 px-4 text-sm font-medium text-gray-400">Attendance %</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reportTableBody" class="text-sm"></tbody>
+                </table>
+            </div>
+            
+            <div class="mt-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="glass rounded-xl p-4">
+                    <h4 class="font-semibold mb-4 text-gray-300">Attendance Trend</h4>
+                    <canvas id="trendChart" class="w-full h-48"></canvas>
+                </div>
+                <div class="glass rounded-xl p-4">
+                    <h4 class="font-semibold mb-4 text-gray-300">Class Distribution</h4>
+                    <canvas id="distributionChart" class="w-full h-48"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <div class="glass-card rounded-2xl p-6 bg-black/30">
+            <h3 class="text-lg font-semibold mb-4 flex items-center gap-2 text-indigo-400">
+                <i data-lucide="code" class="w-5 h-5"></i>
+                Active SQL Query
+            </h3>
+            <pre class="bg-black/50 rounded-xl p-4 overflow-x-auto text-xs font-mono text-green-400" id="sqlQueryDisplay">-- Select report type to see query</pre>
+        </div>
+    </main>
+
+    <div id="toastContainer" class="fixed bottom-6 right-6 z-50 space-y-3"></div>
+
+    <script src="../js/api.js"></script>
+    <script src="../js/reports.js"></script>
+    <script>
+        lucide.createIcons();
+        document.getElementById('reportStart').valueAsDate = new Date(new Date().setDate(new Date().getDate() - 30));
+        document.getElementById('reportEnd').valueAsDate = new Date();
+    </script>
+</body>
+</html>
