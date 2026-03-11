@@ -1,14 +1,18 @@
+// backend/middleware/errorHandler.js
+// Central error handling for all API routes
+
 const errorHandler = (err, req, res, next) => {
     console.error('Error:', err);
 
+    // Validation errors
     if (err.name === 'ValidationError') {
         return res.status(400).json({
             error: 'Validation Error',
-            message: err.message,
-            details: err.details
+            message: err.message
         });
     }
 
+    // JWT errors
     if (err.name === 'UnauthorizedError') {
         return res.status(401).json({
             error: 'Unauthorized',
@@ -16,6 +20,7 @@ const errorHandler = (err, req, res, next) => {
         });
     }
 
+    // PostgreSQL unique violation (duplicate email, etc)
     if (err.code === '23505') {
         return res.status(409).json({
             error: 'Conflict',
@@ -23,6 +28,7 @@ const errorHandler = (err, req, res, next) => {
         });
     }
 
+    // PostgreSQL foreign key violation
     if (err.code === '23503') {
         return res.status(400).json({
             error: 'Bad Request',
@@ -30,18 +36,16 @@ const errorHandler = (err, req, res, next) => {
         });
     }
 
+    // Default error
     res.status(err.status || 500).json({
         error: err.name || 'Internal Server Error',
-        message: process.env.NODE_ENV === 'development' ? err.message : 'Something went wrong',
-        ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
+        message: process.env.NODE_ENV === 'development' ? err.message : 'Something went wrong'
     });
 };
 
+// Wrapper for async functions
 const asyncHandler = (fn) => (req, res, next) => {
     Promise.resolve(fn(req, res, next)).catch(next);
 };
 
-module.exports = {
-    errorHandler,
-    asyncHandler
-};
+module.exports = { errorHandler, asyncHandler };
