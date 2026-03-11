@@ -1,11 +1,15 @@
+// backend/middleware/auth.js
+// JWT authentication middleware
+
 const jwt = require('jsonwebtoken');
 const { supabase } = require('../config/database');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
 
+// Verify JWT token
 const authenticateToken = async (req, res, next) => {
     const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
+    const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
 
     if (!token) {
         return res.status(401).json({ error: 'Access token required' });
@@ -14,6 +18,7 @@ const authenticateToken = async (req, res, next) => {
     try {
         const decoded = jwt.verify(token, JWT_SECRET);
         
+        // Verify user exists in database
         const { data: user, error } = await supabase
             .from('users')
             .select('*')
@@ -31,6 +36,7 @@ const authenticateToken = async (req, res, next) => {
     }
 };
 
+// Check user role
 const requireRole = (roles) => {
     return (req, res, next) => {
         if (!roles.includes(req.user.role)) {
@@ -40,6 +46,7 @@ const requireRole = (roles) => {
     };
 };
 
+// Generate JWT token
 const generateToken = (userId) => {
     return jwt.sign({ userId }, JWT_SECRET, { expiresIn: '24h' });
 };
