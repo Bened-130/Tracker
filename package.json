@@ -1,0 +1,17 @@
+{
+  "name": "schoolvibe-ai-tracker",
+  "version": "1.0.0",
+  "description": "SchoolVibe AI Attendance Tracking System",
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npx serve -l 5500",
+    "build": "cd backend && npm install",
+    "start": "cd backend && npm start",
+    "deploy": "vercel --prod"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "vercel": "^32.6.1"
+  }
+}
