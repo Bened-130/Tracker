@@ -1,8 +1,19 @@
+-- ============================================
+-- SchoolVibe AI Tracker - Database Functions
+-- Run this second in Supabase SQL Editor
+-- ============================================
+
+-- ============================================
+-- 1. DAILY ATTENDANCE REPORT
+-- Returns attendance stats for a specific session
+-- ============================================
 CREATE OR REPLACE FUNCTION get_daily_attendance(p_session_id INTEGER)
 RETURNS TABLE (
     class_name VARCHAR,
     total BIGINT,
     present BIGINT,
+    absent BIGINT,
+    late BIGINT,
     pct DECIMAL
 ) AS $$
 BEGIN
@@ -11,6 +22,8 @@ BEGIN
         c.class_name,
         COUNT(a.student_id) as total,
         SUM(CASE WHEN a.status = 'present' THEN 1 ELSE 0 END) as present,
+        SUM(CASE WHEN a.status = 'absent' THEN 1 ELSE 0 END) as absent,
+        SUM(CASE WHEN a.status = 'late' THEN 1 ELSE 0 END) as late,
         ROUND(100.0 * SUM(CASE WHEN a.status = 'present' THEN 1 ELSE 0 END) / NULLIF(COUNT(a.student_id), 0), 2) as pct
     FROM classes c
     JOIN sessions s ON c.class_id = s.class_id
@@ -20,6 +33,10 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- ============================================
+-- 2. GET ABSENT STUDENTS (for auto-marking)
+-- Returns students who haven't checked in
+-- ============================================
 CREATE OR REPLACE FUNCTION get_absent_students(p_session_id INTEGER)
 RETURNS TABLE (
     student_id INTEGER,
@@ -47,6 +64,10 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- ============================================
+-- 3. ATTENDANCE STREAK CALCULATOR
+-- Returns consecutive days present
+-- ============================================
 CREATE OR REPLACE FUNCTION get_attendance_streak(p_student_id INTEGER)
 RETURNS INTEGER AS $$
 DECLARE
@@ -73,6 +94,10 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- ============================================
+-- 4. MONTHLY SUMMARY REPORT
+-- Returns monthly averages for a class
+-- ============================================
 CREATE OR REPLACE FUNCTION get_monthly_summary(
     p_class_id INTEGER,
     p_start_date DATE,
@@ -101,46 +126,5 @@ BEGIN
     AND s.session_date BETWEEN p_start_date AND p_end_date
     GROUP BY DATE_TRUNC('month', s.session_date), c.class_id, c.class_name
     ORDER BY month;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE OR REPLACE FUNCTION find_similar_faces(
-    query_descriptor JSONB,
-    threshold DECIMAL DEFAULT 0.6
-)
-RETURNS TABLE (
-    student_id INTEGER,
-    first_name VARCHAR,
-    last_name VARCHAR,
-    similarity DECIMAL
-) AS $$
-DECLARE
-    query_vector DECIMAL[];
-BEGIN
-    query_vector := ARRAY(SELECT jsonb_array_elements_text(query_descriptor))::DECIMAL[];
-    
-    RETURN QUERY
-    SELECT 
-        s.student_id,
-        s.first_name,
-        s.last_name,
-        1 - (
-            SELECT SQRT(SUM((d.elem - q.elem)^2))
-            FROM unnest(
-                ARRAY(SELECT jsonb_array_elements_text(s.face_descriptors))::DECIMAL[]
-            ) WITH ORDINALITY AS d(elem, idx),
-            unnest(query_vector) WITH ORDINALITY AS q(elem, idx)
-            WHERE d.idx = q.idx
-        ) / 128.0 as similarity
-    FROM students s
-    WHERE s.face_descriptors IS NOT NULL
-    HAVING 1 - (
-        SELECT SQRT(SUM((d.elem - q.elem)^2))
-        FROM unnest(
-            ARRAY(SELECT jsonb_array_elements_text(s.face_descriptors))::DECIMAL[]
-        ) WITH ORDINALITY AS d(elem, idx),
-        unnest(query_vector) WITH ORDINALITY AS q(elem, idx)
-        WHERE d.idx = q.idx
-    ) / 128.0 > threshold;
 END;
 $$ LANGUAGE plpgsql;

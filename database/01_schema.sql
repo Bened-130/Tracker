@@ -1,5 +1,14 @@
+-- ============================================
+-- SchoolVibe AI Tracker - Database Schema
+-- Run this first in Supabase SQL Editor
+-- ============================================
+
+-- Enable UUID extension for unique IDs
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
+-- ============================================
+-- 1. USERS TABLE (for authentication)
+-- ============================================
 CREATE TABLE users (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     email VARCHAR(255) UNIQUE NOT NULL,
@@ -11,19 +20,25 @@ CREATE TABLE users (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- ============================================
+-- 2. STUDENTS TABLE (main table with face data)
+-- ============================================
 CREATE TABLE students (
     student_id SERIAL PRIMARY KEY,
     first_name VARCHAR(100) NOT NULL,
     last_name VARCHAR(100) NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
     student_number VARCHAR(50) UNIQUE,
-    face_descriptors JSONB,
+    face_descriptors JSONB, -- Stores 128-dimensional face vectors
     photo_url TEXT,
     is_active BOOLEAN DEFAULT true,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- ============================================
+-- 3. CLASSES TABLE
+-- ============================================
 CREATE TABLE classes (
     class_id SERIAL PRIMARY KEY,
     class_name VARCHAR(100) NOT NULL,
@@ -35,6 +50,9 @@ CREATE TABLE classes (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- ============================================
+-- 4. SESSIONS TABLE (class instances)
+-- ============================================
 CREATE TABLE sessions (
     session_id SERIAL PRIMARY KEY,
     class_id INTEGER REFERENCES classes(class_id) ON DELETE CASCADE,
@@ -45,6 +63,9 @@ CREATE TABLE sessions (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- ============================================
+-- 5. ENROLLMENTS TABLE (student-class links)
+-- ============================================
 CREATE TABLE enrollments (
     enrollment_id SERIAL PRIMARY KEY,
     student_id INTEGER REFERENCES students(student_id) ON DELETE CASCADE,
@@ -53,6 +74,9 @@ CREATE TABLE enrollments (
     UNIQUE(student_id, class_id)
 );
 
+-- ============================================
+-- 6. ATTENDANCE TABLE (core tracking table)
+-- ============================================
 CREATE TABLE attendance (
     session_id INTEGER REFERENCES sessions(session_id) ON DELETE CASCADE,
     student_id INTEGER REFERENCES students(student_id) ON DELETE CASCADE,
@@ -65,6 +89,9 @@ CREATE TABLE attendance (
     PRIMARY KEY (session_id, student_id)
 );
 
+-- ============================================
+-- INDEXES FOR PERFORMANCE
+-- ============================================
 CREATE INDEX idx_students_email ON students(email);
 CREATE INDEX idx_students_active ON students(is_active);
 CREATE INDEX idx_sessions_date ON sessions(session_date);
@@ -72,8 +99,13 @@ CREATE INDEX idx_sessions_class ON sessions(class_id);
 CREATE INDEX idx_attendance_student ON attendance(student_id);
 CREATE INDEX idx_attendance_timestamp ON attendance(timestamp);
 CREATE INDEX idx_attendance_status ON attendance(status);
+
+-- GIN index for face descriptor searches
 CREATE INDEX idx_students_face_descriptors ON students USING GIN (face_descriptors);
 
+-- ============================================
+-- AUTO-UPDATE TIMESTAMP TRIGGER
+-- ============================================
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -88,12 +120,16 @@ CREATE TRIGGER update_students_updated_at BEFORE UPDATE ON students
 CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+-- ============================================
+-- ROW LEVEL SECURITY (RLS) POLICIES
+-- ============================================
 ALTER TABLE students ENABLE ROW LEVEL SECURITY;
 ALTER TABLE classes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE sessions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE attendance ENABLE ROW LEVEL SECURITY;
 ALTER TABLE enrollments ENABLE ROW LEVEL SECURITY;
 
+-- Students: Teachers can see all, students only themselves
 CREATE POLICY students_teacher_policy ON students
     FOR ALL TO authenticated
     USING (auth.jwt() ->> 'role' IN ('teacher', 'admin'));
@@ -102,6 +138,7 @@ CREATE POLICY students_self_policy ON students
     FOR SELECT TO authenticated
     USING (student_id::text = auth.jwt() ->> 'student_id');
 
+-- Classes: Everyone can view active classes
 CREATE POLICY classes_view_policy ON classes
     FOR SELECT TO authenticated
     USING (is_active = true);
@@ -110,6 +147,7 @@ CREATE POLICY classes_admin_policy ON classes
     FOR ALL TO authenticated
     USING (auth.jwt() ->> 'role' = 'admin');
 
+-- Attendance: Teachers see all, students see own
 CREATE POLICY attendance_teacher_policy ON attendance
     FOR ALL TO authenticated
     USING (auth.jwt() ->> 'role' IN ('teacher', 'admin'));
