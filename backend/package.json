@@ -1,7 +1,7 @@
 {
-  "name": "schoolvibe-backend",
+  "name": "tracker-backend",
   "version": "1.0.0",
-  "description": "SchoolVibe AI Tracker Backend",
+  "description": "SchoolVibe AI Tracker Backend API",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
