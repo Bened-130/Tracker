@@ -1,4 +1,11 @@
+// backend/services/faceRecognition.js
+// Face recognition and matching algorithms
+
 class FaceRecognitionService {
+    /**
+     * Compute average of multiple 128D face descriptors
+     * Used when registering a student with multiple photos
+     */
     computeAverageDescriptor(descriptors) {
         if (!Array.isArray(descriptors) || descriptors.length === 0) {
             throw new Error('At least one descriptor required');
@@ -23,6 +30,10 @@ class FaceRecognitionService {
         return Array.from(sum);
     }
 
+    /**
+     * Calculate Euclidean distance between two face descriptors
+     * Lower distance = more similar faces
+     */
     euclideanDistance(desc1, desc2) {
         if (desc1.length !== desc2.length) {
             throw new Error('Descriptors must have same length');
@@ -36,6 +47,10 @@ class FaceRecognitionService {
         return Math.sqrt(sum);
     }
 
+    /**
+     * Find best matching student from database
+     * Returns match only if distance is below threshold (0.6)
+     */
     findBestMatch(queryDescriptor, students, threshold = 0.6) {
         let bestMatch = null;
         let bestDistance = Infinity;
@@ -60,6 +75,7 @@ class FaceRecognitionService {
             }
         }
 
+        // Only return if confidence is good enough (distance < 0.6)
         if (bestMatch && bestDistance < threshold) {
             return {
                 student: bestMatch,
@@ -70,17 +86,7 @@ class FaceRecognitionService {
 
         return null;
     }
-
-    isValidDescriptor(descriptor) {
-        return Array.isArray(descriptor) 
-            && descriptor.length === 128 
-            && descriptor.every(n => typeof n === 'number' && !isNaN(n));
-    }
-
-    normalize(descriptor) {
-        const magnitude = Math.sqrt(descriptor.reduce((sum, val) => sum + val * val, 0));
-        return descriptor.map(val => val / magnitude);
-    }
 }
 
+// Export singleton instance
 module.exports = new FaceRecognitionService();
