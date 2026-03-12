@@ -1,24 +1,35 @@
 // backend/config/database.js
-// Supabase PostgreSQL connection configuration
+// Supabase connection using ANON KEY with RLS support
 
 const { createClient } = require('@supabase/supabase-js');
 
-// Get credentials from environment variables
-const supabaseUrl = process.env.zokmdocanxmlkpoovkrn;
-const supabaseKey = process.env.eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpva21kb2NhbnhtbGtwb292a3JuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyNDM1MDUsImV4cCI6MjA4ODgxOTUwNX0.Q3lSgdzkgApVEwWxr21CQM1DI_4gqhIuwlsMEvzk8R8;
-// Validate credentials
+// ============================================
+// ENVIRONMENT VARIABLES
+// ============================================
+// SUPABASE_URL      - Your Supabase project URL
+// SUPABASE_ANON_KEY - Anon key (RLS policies apply!)
+// ============================================
+
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_ANON_KEY;
+
+// Validation
 if (!supabaseUrl || !supabaseKey) {
-  console.error('❌ Missing Supabase credentials!');
-  console.error('Required environment variables:');
-  console.error('  - SUPABASE_URL');
-  console.error('  - SUPABASE_SERVICE_KEY');
+  console.error('❌ CRITICAL: Missing Supabase credentials!');
+  console.error('Required: SUPABASE_URL and SUPABASE_ANON_KEY');
+  
+  if (process.env.NODE_ENV === 'production') {
+    process.exit(1);
+  }
 }
 
-// Create Supabase client with connection pooling settings
+// Create Supabase client with anon key
+// Note: RLS policies are enforced! Make sure your policies allow operations
 const supabase = createClient(supabaseUrl, supabaseKey, {
   auth: {
     autoRefreshToken: true,
-    persistSession: false
+    persistSession: false,
+    detectSessionInUrl: false
   },
   db: {
     schema: 'public'
@@ -30,16 +41,24 @@ const supabase = createClient(supabaseUrl, supabaseKey, {
   }
 });
 
-// Test connection function
+// Test connection (will fail if RLS blocks access)
 const testConnection = async () => {
   try {
     const { data, error } = await supabase
       .from('students')
       .select('count', { count: 'exact', head: true });
     
-    if (error) throw error;
+    if (error) {
+      // Check if it's an RLS error
+      if (error.code === '42501' || error.message.includes('permission denied')) {
+        console.error('❌ RLS Policy Error: Anonymous access blocked');
+        console.error('   Go to Supabase Dashboard → Database → RLS Policies');
+        console.error('   Enable appropriate policies for your tables');
+      }
+      throw error;
+    }
     
-    console.log('✅ Database connected successfully');
+    console.log('✅ Database connected (RLS active)');
     return true;
   } catch (error) {
     console.error('❌ Database connection failed:', error.message);
@@ -47,18 +66,24 @@ const testConnection = async () => {
   }
 };
 
-// Health check for connection pool
-const checkHealth = async () => {
-  try {
-    const { error } = await supabase.rpc('pg_health_check');
-    return !error;
-  } catch {
-    return false;
-  }
+// Check if error is RLS-related
+const isRLSError = (error) => {
+  return error?.code === '42501' || 
+         error?.message?.includes('permission denied') ||
+         error?.message?.includes('row-level security');
 };
+
+// Get connection info
+const getConnectionInfo = () => ({
+  url: supabaseUrl,
+  hasKey: !!supabaseKey,
+  keyPrefix: supabaseKey ? `${supabaseKey.substring(0, 10)}...` : null,
+  environment: process.env.NODE_ENV
+});
 
 module.exports = { 
   supabase, 
   testConnection,
-  checkHealth
+  isRLSError,
+  getConnectionInfo
 };
