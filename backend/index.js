@@ -1,7 +1,8 @@
 // backend/index.js
-// Main entry point for Vercel serverless deployment
+// Main server entry point
 
-require('dotenv').config();
+require('dotenv').config(); // ← This loads your .env file
+
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -20,35 +21,33 @@ const reportRoutes = require('./routes/reports');
 const app = express();
 
 // ============================================
-// SECURITY MIDDLEWARE
+// CONFIGURATION FROM ENVIRONMENT
 // ============================================
-app.use(helmet({
-  crossOriginResourcePolicy: { policy: "cross-origin" },
-  crossOriginEmbedderPolicy: false
-}));
 
+const ENV = {
+  NODE_ENV: process.env.NODE_ENV || 'development',
+  PORT: parseInt(process.env.PORT) || 3000,
+  FRONTEND_URL: process.env.FRONTEND_URL || '*'
+};
+
+// ============================================
+// MIDDLEWARE
+// ============================================
+
+app.use(helmet());
 app.use(cors({
-  origin: process.env.FRONTEND_URL || '*',
+  origin: ENV.FRONTEND_URL,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 // Rate limiting
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
+  windowMs: 15 * 60 * 1000,
   max: 100,
-  message: { error: 'Too many requests from this IP', retryAfter: 900 }
+  message: 'Too many requests'
 });
 app.use('/api/', limiter);
-
-// Stricter limit for face recognition
-const faceRecognitionLimiter = rateLimit({
-  windowMs: 1 * 60 * 1000, // 1 minute
-  max: 20,
-  message: { error: 'Face recognition rate limit exceeded', retryAfter: 60 }
-});
-app.use('/api/attendance/mark', faceRecognitionLimiter);
 
 // Body parsing
 app.use(express.json({ limit: '10mb' }));
@@ -56,28 +55,17 @@ app.use(express.urlencoded({ extended: true }));
 app.use(compression());
 
 // ============================================
-// REQUEST LOGGING (Development)
-// ============================================
-if (process.env.NODE_ENV !== 'production') {
-  app.use((req, res, next) => {
-    console.log(`${new Date().toISOString()} - ${req.method} ${req.path}`);
-    next();
-  });
-}
-
-// ============================================
 // ROUTES
 // ============================================
 
-// Health check endpoint
+// Health check
 app.get('/api/health', async (req, res) => {
   const dbConnected = await testConnection();
   res.json({
-    status: 'ok',
+    status: dbConnected ? 'ok' : 'error',
     timestamp: new Date().toISOString(),
     database: dbConnected ? 'connected' : 'disconnected',
-    version: '1.0.0',
-    environment: process.env.NODE_ENV || 'development'
+    environment: ENV.NODE_ENV
   });
 });
 
@@ -87,46 +75,29 @@ app.use('/api/attendance', attendanceRoutes);
 app.use('/api/classes', classRoutes);
 app.use('/api/reports', reportRoutes);
 
-// Root API endpoint
-app.get('/api', (req, res) => {
-  res.json({
-    message: 'SchoolVibe AI Tracker API',
-    version: '1.0.0',
-    endpoints: {
-      students: '/api/students',
-      attendance: '/api/attendance',
-      classes: '/api/classes',
-      reports: '/api/reports',
-      health: '/api/health'
-    }
-  });
-});
-
 // Error handling
 app.use(errorHandler);
 
 // 404 handler
 app.use((req, res) => {
-  res.status(404).json({ 
-    error: 'Endpoint not found',
-    path: req.path,
-    method: req.method
-  });
+  res.status(404).json({ error: 'Endpoint not found' });
 });
 
 // ============================================
-// LOCAL DEVELOPMENT SERVER
+// START SERVER (Local development only)
 // ============================================
-if (process.env.NODE_ENV !== 'production') {
-  const PORT = process.env.PORT || 3000;
-  app.listen(PORT, () => {
+
+if (ENV.NODE_ENV !== 'production') {
+  app.listen(ENV.PORT, () => {
     console.log(`
     ╔════════════════════════════════════════════════╗
-    ║                                                ║
-    ║     🎓 BENEDICT ACADEMY Backend           ║
-    ║                                                ║
-    ║     Local: http://localhost:${PORT}/api          ║
-    ║     Health: http://localhost:${PORT}/api/health  ║
-    ║                                                ║
+    ║  🎓 BENEDICT ACADEMY Tracker Backend              ║
+    ║  Local: http://localhost:${ENV.PORT}/api          ║
     ╚════════════════════════════════════════════════╝
     `);
+    testConnection();
+  });
+}
+
+// Export for Vercel
+module.exports = app;
