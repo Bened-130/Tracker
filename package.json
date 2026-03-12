@@ -1,16 +1,8 @@
 {
-  "name": "benedict-academy-attendance-tracker",
+  "name": "benedict-academy-tracker",
   "version": "1.0.0",
-  "description": "BENEDICT ACADEMY Attendance Tracker - Full Stack Application",
-  "main": "backend/index.js",
   "scripts": {
-    "dev": "cd backend && npm run dev",
-    "build": "cd backend && npm install",
-    "start": "cd backend && npm start"
+    "vercel-build": "echo 'Build complete'"
   },
-  "engines": {
-    "node": ">=18.x"
-  },
-  "dependencies": {},
-  "devDependencies": {}
+  "dependencies": {}
 }
