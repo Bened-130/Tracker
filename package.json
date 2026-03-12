@@ -1,17 +1,16 @@
 {
-  "name": "ben_kim_tracker",
+  "name": "BENEDICT ACADEMY",
   "version": "1.0.0",
-  "description": "SchoolVibe AI Attendance Tracking System",
+  "description": "BENEDICT ACADEMY Attendance Tracker - Full Stack Application",
+  "main": "backend/index.js",
   "scripts": {
-    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
-    "dev:backend": "cd backend && npm run dev",
-    "dev:frontend": "cd frontend && npx serve -l 5500",
+    "dev": "cd backend && npm run dev",
     "build": "cd backend && npm install",
-    "start": "cd backend && npm start",
-    "deploy": "vercel --prod"
+    "start": "cd backend && npm start"
   },
-  "devDependencies": {
-    "concurrently": "^8.2.2",
-    "vercel": "^32.6.1"
-  }
+  "engines": {
+    "node": ">=18.x"
+  },
+  "dependencies": {},
+  "devDependencies": {}
 }
