@@ -1,3 +1,6 @@
+// backend/server.js
+// Main server entry point
+
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -17,7 +20,9 @@ const reportRoutes = require('./routes/reports');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Security middleware
+// ============================================
+// SECURITY MIDDLEWARE
+// ============================================
 app.use(helmet());
 app.use(cors({
     origin: process.env.FRONTEND_URL || '*',
@@ -27,15 +32,15 @@ app.use(cors({
 
 // Rate limiting
 const limiter = rateLimit({
-    windowMs: 15 * 60 * 1000,
+    windowMs: 15 * 60 * 1000, // 15 minutes
     max: 100,
     message: 'Too many requests from this IP'
 });
 app.use('/api/', limiter);
 
-// Stricter limit for face recognition endpoint
+// Stricter limit for face recognition
 const faceRecognitionLimiter = rateLimit({
-    windowMs: 1 * 60 * 1000,
+    windowMs: 1 * 60 * 1000, // 1 minute
     max: 10,
     message: 'Face recognition rate limit exceeded'
 });
@@ -45,6 +50,10 @@ app.use('/api/attendance/mark', faceRecognitionLimiter);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(compression());
+
+// ============================================
+// ROUTES
+// ============================================
 
 // Health check
 app.get('/health', async (req, res) => {
@@ -71,7 +80,9 @@ app.use((req, res) => {
     res.status(404).json({ error: 'Endpoint not found' });
 });
 
-// Start server
+// ============================================
+// START SERVER
+// ============================================
 app.listen(PORT, () => {
     console.log(`
     ╔════════════════════════════════════════════════╗
