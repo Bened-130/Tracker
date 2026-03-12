@@ -1,5 +1,5 @@
 {
-  "name": "BENEDICT ACADEMY",
+  "name": "benedict-academy-attendance-tracker",
   "version": "1.0.0",
   "description": "BENEDICT ACADEMY Attendance Tracker - Full Stack Application",
   "main": "backend/index.js",
