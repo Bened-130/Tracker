@@ -1,16 +1,22 @@
+// backend/controllers/studentController.js
+// Student registration and management
+
 const { supabase } = require('../config/database');
 const { asyncHandler } = require('../middleware/errorHandler');
 const faceRecognition = require('../services/faceRecognition');
 
+// Register new student with face descriptors
 exports.registerStudent = asyncHandler(async (req, res) => {
     const { first_name, last_name, email, class_id, face_descriptors } = req.body;
 
+    // Validate face descriptors
     if (!Array.isArray(face_descriptors) || face_descriptors.length < 5) {
         return res.status(400).json({
             error: 'At least 5 face descriptors required'
         });
     }
 
+    // Validate each descriptor is 128-dimensional
     for (const desc of face_descriptors) {
         if (!Array.isArray(desc) || desc.length !== 128) {
             return res.status(400).json({
@@ -19,8 +25,10 @@ exports.registerStudent = asyncHandler(async (req, res) => {
         }
     }
 
+    // Compute average descriptor from multiple photos
     const averagedDescriptor = faceRecognition.computeAverageDescriptor(face_descriptors);
 
+    // Insert student into database
     const { data: student, error } = await supabase
         .from('students')
         .insert([{
@@ -35,6 +43,7 @@ exports.registerStudent = asyncHandler(async (req, res) => {
 
     if (error) throw error;
 
+    // Enroll in class if provided
     if (class_id) {
         const { error: enrollError } = await supabase
             .from('enrollments')
@@ -53,31 +62,20 @@ exports.registerStudent = asyncHandler(async (req, res) => {
             student_id: student.student_id,
             first_name: student.first_name,
             last_name: student.last_name,
-            email: student.email,
-            face_descriptor_sample: averagedDescriptor.slice(0, 5).map(d => d.toFixed(4)) + '...'
+            email: student.email
         }
     });
 });
 
+// Get all students
 exports.getStudents = asyncHandler(async (req, res) => {
     const { class_id, search, limit = 50, offset = 0 } = req.query;
 
     let query = supabase
         .from('students')
-        .select(`
-            student_id,
-            first_name,
-            last_name,
-            email,
-            created_at,
-            enrollments:class_id (class_id, classes:class_id (class_name))
-        `)
+        .select('student_id, first_name, last_name, email, created_at', { count: 'exact' })
         .order('created_at', { ascending: false })
         .range(offset, offset + limit - 1);
-
-    if (class_id) {
-        query = query.eq('enrollments.class_id', class_id);
-    }
 
     if (search) {
         query = query.or(`first_name.ilike.%${search}%,last_name.ilike.%${search}%,email.ilike.%${search}%`);
@@ -94,6 +92,7 @@ exports.getStudents = asyncHandler(async (req, res) => {
     });
 });
 
+// Get single student
 exports.getStudent = asyncHandler(async (req, res) => {
     const { id } = req.params;
 
@@ -120,6 +119,7 @@ exports.getStudent = asyncHandler(async (req, res) => {
         return res.status(404).json({ error: 'Student not found' });
     }
 
+    // Remove sensitive face descriptor data for non-admin
     if (req.user?.role !== 'admin') {
         delete student.face_descriptors;
     }
@@ -130,30 +130,7 @@ exports.getStudent = asyncHandler(async (req, res) => {
     });
 });
 
-exports.updateStudent = asyncHandler(async (req, res) => {
-    const { id } = req.params;
-    const updates = req.body;
-
-    delete updates.face_descriptors;
-
-    const { data: student, error } = await supabase
-        .from('students')
-        .update({
-            ...updates,
-            updated_at: new Date().toISOString()
-        })
-        .eq('student_id', id)
-        .select()
-        .single();
-
-    if (error) throw error;
-
-    res.json({
-        success: true,
-        data: student
-    });
-});
-
+// Delete student
 exports.deleteStudent = asyncHandler(async (req, res) => {
     const { id } = req.params;
 
@@ -167,35 +144,5 @@ exports.deleteStudent = asyncHandler(async (req, res) => {
     res.json({
         success: true,
         message: 'Student deleted successfully'
-    });
-});
-
-exports.updateFaceDescriptors = asyncHandler(async (req, res) => {
-    const { id } = req.params;
-    const { face_descriptors } = req.body;
-
-    if (!Array.isArray(face_descriptors) || face_descriptors.length < 5) {
-        return res.status(400).json({
-            error: 'At least 5 face descriptors required'
-        });
-    }
-
-    const averagedDescriptor = faceRecognition.computeAverageDescriptor(face_descriptors);
-
-    const { data: student, error } = await supabase
-        .from('students')
-        .update({
-            face_descriptors: JSON.stringify(averagedDescriptor),
-            updated_at: new Date().toISOString()
-        })
-        .eq('student_id', id)
-        .select()
-        .single();
-
-    if (error) throw error;
-
-    res.json({
-        success: true,
-        message: 'Face descriptors updated successfully'
     });
 });
