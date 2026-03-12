@@ -5,7 +5,7 @@ const { createClient } = require('@supabase/supabase-js');
 
 // Get credentials from environment variables
 const supabaseUrl = process.env.zokmdocanxmlkpoovkrn;
-const supabaseKey = process.env.sb_publishable_7aexp5zNbXieea5yd_A3eg_1hs2wEBk;
+const supabaseKey = process.env.eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpva21kb2NhbnhtbGtwb292a3JuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyNDM1MDUsImV4cCI6MjA4ODgxOTUwNX0.Q3lSgdzkgApVEwWxr21CQM1DI_4gqhIuwlsMEvzk8R8;
 // Validate credentials
 if (!supabaseUrl || !supabaseKey) {
   console.error('❌ Missing Supabase credentials!');
