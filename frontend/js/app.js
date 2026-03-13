@@ -1,119 +1,140 @@
-const API_BASE_URL = 'http://localhost:3000/api';
-const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.12/model';
+/**
+ * Main Application JavaScript
+ * 
+ * Shared functionality across all pages.
+ */
 
-class ApiService {
-    constructor() {
-        this.token = localStorage.getItem('authToken');
-    }
-
-    async request(endpoint, options = {}) {
-        const url = `${API_BASE_URL}${endpoint}`;
-        const config = {
-            headers: {
-                'Content-Type': 'application/json',
-                ...(this.token && { 'Authorization': `Bearer ${this.token}` }),
-                ...options.headers
-            },
-            ...options
-        };
-
-        if (config.body && typeof config.body === 'object') {
-            config.body = JSON.stringify(config.body);
-        }
-
-        try {
-            const response = await fetch(url, config);
-            const data = await response.json();
-            
-            if (!response.ok) {
-                throw new Error(data.error || `HTTP ${response.status}`);
-            }
-            
-            return data;
-        } catch (error) {
-            console.error('API Error:', error);
-            showToast(error.message, 'error');
-            throw error;
-        }
-    }
-
-    async getStudents(params = {}) {
-        const query = new URLSearchParams(params).toString();
-        return this.request(`/students?${query}`);
-    }
-
-    async registerStudent(studentData) {
-        return this.request('/students', {
-            method: 'POST',
-            body: studentData
-        });
-    }
-
-    async markAttendance(data) {
-        return this.request('/attendance/mark', {
-            method: 'POST',
-            body: data
-        });
-    }
-
-    async getSessionAttendance(sessionId) {
-        return this.request(`/attendance/session/${sessionId}`);
-    }
-
-    async getClasses() {
-        return this.request('/classes');
-    }
-
-    async getDailyReport(sessionId) {
-        return this.request(`/reports/daily/${sessionId}`);
-    }
-
-    async getRosterReport(sessionId) {
-        return this.request(`/reports/roster/${sessionId}`);
-    }
-
-    async getMonthlyReport(classId, startDate, endDate) {
-        return this.request(`/reports/monthly/${classId}?start_date=${startDate}&end_date=${endDate}`);
-    }
-
-    async exportReport(type, format, filters) {
-        const query = new URLSearchParams(filters).toString();
-        window.open(`${API_BASE_URL}/reports/export/${type}/${format}?${query}`, '_blank');
-    }
-}
-
-const api = new ApiService();
+// ============================================
+// TOAST NOTIFICATION SYSTEM
+// ============================================
 
 function showToast(message, type = 'info') {
-    const container = document.getElementById('toastContainer');
+    // Create container if doesn't exist
+    let container = document.getElementById('toastContainer');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'toastContainer';
+        container.className = 'toast-container';
+        document.body.appendChild(container);
+    }
+
+    // Create toast element
     const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
     
-    const colors = {
-        success: 'bg-green-500',
-        error: 'bg-red-500',
-        warning: 'bg-yellow-500',
-        info: 'bg-indigo-500'
-    };
-    
+    // Icon based on type
     const icons = {
-        success: 'check-circle',
-        error: 'x-circle',
-        warning: 'alert-triangle',
-        info: 'info'
+        success: '✓',
+        error: '✕',
+        warning: '⚠',
+        info: 'ℹ'
     };
     
-    toast.className = `${colors[type]} text-white px-6 py-3 rounded-xl shadow-lg flex items-center gap-3 transform transition-all duration-300 translate-x-full`;
     toast.innerHTML = `
-        <i data-lucide="${icons[type]}" class="w-5 h-5"></i>
-        <span class="font-medium">${message}</span>
+        <span style="font-size: 1.25rem;">${icons[type]}</span>
+        <span>${message}</span>
     `;
-    
+
     container.appendChild(toast);
-    if (window.lucide) lucide.createIcons();
-    
-    setTimeout(() => toast.classList.remove('translate-x-full'), 100);
+
+    // Auto remove after 4 seconds
     setTimeout(() => {
-        toast.classList.add('translate-x-full');
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(100%)';
         setTimeout(() => toast.remove(), 300);
-    }, 3000);
+    }, 4000);
+}
+
+// ============================================
+// NAVIGATION ACTIVE STATE
+// ============================================
+
+function setActiveNavLink() {
+    const currentPage = window.location.pathname.split('/').pop() || 'index.html';
+    
+    document.querySelectorAll('.nav-link').forEach(link => {
+        const linkPage = link.getAttribute('href').split('/').pop();
+        if (linkPage === currentPage) {
+            link.classList.add('active');
+        } else {
+            link.classList.remove('active');
+        }
+    });
+}
+
+// ============================================
+// DATE FORMATTING
+// ============================================
+
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+    });
+}
+
+function formatTime(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
+
+// ============================================
+// LOADING STATES
+// ============================================
+
+function showLoading(element, text = 'Loading...') {
+    element.disabled = true;
+    element.dataset.originalText = element.textContent;
+    element.innerHTML = `<span class="spinner"></span> ${text}`;
+}
+
+function hideLoading(element) {
+    element.disabled = false;
+    element.textContent = element.dataset.originalText || 'Submit';
+}
+
+// ============================================
+// INITIALIZE ON PAGE LOAD
+// ============================================
+
+document.addEventListener('DOMContentLoaded', () => {
+    setActiveNavLink();
+    
+    // Load classes into select dropdowns if they exist
+    loadClassOptions();
+});
+
+// ============================================
+// LOAD CLASS OPTIONS
+// ============================================
+
+async function loadClassOptions() {
+    const selects = document.querySelectorAll('.class-select');
+    if (selects.length === 0) return;
+
+    try {
+        const response = await api.getClasses();
+        const classes = response.data;
+
+        selects.forEach(select => {
+            // Keep first option (placeholder)
+            const placeholder = select.options[0];
+            select.innerHTML = '';
+            select.appendChild(placeholder);
+
+            classes.forEach(cls => {
+                const option = document.createElement('option');
+                option.value = cls.class_id;
+                option.textContent = cls.class_name;
+                select.appendChild(option);
+            });
+        });
+    } catch (error) {
+        console.error('Failed to load classes:', error);
+    }
 }
