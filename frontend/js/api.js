@@ -1,17 +1,35 @@
-// frontend/js/api.js
-// Central API client - all HTTP requests go through here
+/**
+ * API Service
+ * 
+ * Handles all communication with the backend.
+ * Change API_BASE_URL when deploying.
+ */
 
-// Change this after deploying backend
-const API_BASE_URL = 'http://localhost:3000/api';
-// After deployment: 'https://your-backend.vercel.app/api'
+// ============================================
+// CONFIGURATION - UPDATE THIS WHEN DEPLOYING
+// ============================================
+
+// Local development
+// const API_BASE_URL = 'http://localhost:3000/api';
+
+// Production (update after backend deployment)
+const API_BASE_URL = 'https://your-backend-url.vercel.app/api';
+
+// ============================================
+// API SERVICE CLASS
+// ============================================
 
 class ApiService {
     constructor() {
+        this.baseUrl = API_BASE_URL;
         this.token = localStorage.getItem('authToken');
     }
 
+    /**
+     * Make HTTP request to API
+     */
     async request(endpoint, options = {}) {
-        const url = `${API_BASE_URL}${endpoint}`;
+        const url = `${this.baseUrl}${endpoint}`;
         
         const config = {
             headers: {
@@ -37,15 +55,22 @@ class ApiService {
             return data;
         } catch (error) {
             console.error('API Error:', error);
-            showToast(error.message, 'error');
+            this.showError(error.message);
             throw error;
         }
     }
 
-    // Students
+    // ============================================
+    // STUDENT ENDPOINTS
+    // ============================================
+
     async getStudents(params = {}) {
         const query = new URLSearchParams(params).toString();
         return this.request(`/students?${query}`);
+    }
+
+    async getStudent(id) {
+        return this.request(`/students/${id}`);
     }
 
     async registerStudent(studentData) {
@@ -55,11 +80,17 @@ class ApiService {
         });
     }
 
-    // Attendance
-    async markAttendance(data) {
+    // ============================================
+    // ATTENDANCE ENDPOINTS
+    // ============================================
+
+    async markAttendance(sessionId, faceDescriptor) {
         return this.request('/attendance/mark', {
             method: 'POST',
-            body: data
+            body: {
+                session_id: sessionId,
+                face_descriptor: faceDescriptor
+            }
         });
     }
 
@@ -67,12 +98,22 @@ class ApiService {
         return this.request(`/attendance/session/${sessionId}`);
     }
 
-    // Classes
+    // ============================================
+    // CLASS ENDPOINTS
+    // ============================================
+
     async getClasses() {
         return this.request('/classes');
     }
 
-    // Reports
+    async getClass(id) {
+        return this.request(`/classes/${id}`);
+    }
+
+    // ============================================
+    // REPORT ENDPOINTS
+    // ============================================
+
     async getDailyReport(sessionId) {
         return this.request(`/reports/daily/${sessionId}`);
     }
@@ -81,33 +122,28 @@ class ApiService {
         return this.request(`/reports/roster/${sessionId}`);
     }
 
-    async getMonthlyReport(classId, startDate, endDate) {
-        return this.request(`/reports/monthly/${classId}?start_date=${startDate}&end_date=${endDate}`);
+    // ============================================
+    // UTILITY METHODS
+    // ============================================
+
+    showError(message) {
+        if (window.showToast) {
+            showToast(message, 'error');
+        } else {
+            alert(message);
+        }
+    }
+
+    setToken(token) {
+        this.token = token;
+        localStorage.setItem('authToken', token);
+    }
+
+    clearToken() {
+        this.token = null;
+        localStorage.removeItem('authToken');
     }
 }
 
 // Create global instance
 const api = new ApiService();
-
-// Toast notification helper
-function showToast(message, type = 'info') {
-    const container = document.getElementById('toastContainer') || createToastContainer();
-    
-    const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
-    toast.textContent = message;
-    
-    container.appendChild(toast);
-    
-    setTimeout(() => {
-        toast.remove();
-    }, 3000);
-}
-
-function createToastContainer() {
-    const container = document.createElement('div');
-    container.id = 'toastContainer';
-    container.className = 'toast-container';
-    document.body.appendChild(container);
-    return container;
-}
