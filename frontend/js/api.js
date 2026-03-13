@@ -13,7 +13,7 @@
 // const API_BASE_URL = 'http://localhost:3000/api';
 
 // Production (update after backend deployment)
-const API_BASE_URL = 'https://your-backend-url.vercel.app/api';
+const API_BASE_URL = 'https://benkimtracker.vercel.app//api';
 
 // ============================================
 // API SERVICE CLASS
