@@ -1,0 +1,5 @@
+# Netlify redirects - Place this in frontend folder
+/api/*  /.netlify/functions/api/:splat  200
+
+# SPA fallback (optional)
+/*      /index.html                     200
