@@ -1,149 +1,111 @@
 /**
- * API Service
+ * API Service - Netlify Functions Version
  * 
- * Handles all communication with the backend.
- * Change API_BASE_URL when deploying.
+ * All API calls go to /.netlify/functions/api/* which are
+ * automatically routed to the appropriate serverless function.
  */
 
-// ============================================
-// CONFIGURATION - UPDATE THIS WHEN DEPLOYING
-// ============================================
+const API_BASE = '';  // Relative path for Netlify
 
-// Local development
-// const API_BASE_URL = 'http://localhost:3000/api';
+// Helper for API calls
+async function apiCall(endpoint, options = {}) {
+  const url = `${API_BASE}/.netlify/functions/api${endpoint}`;
+  
+  const config = {
+    headers: {
+      'Content-Type': 'application/json',
+      ...options.headers
+    },
+    ...options
+  };
 
-// Production (update after backend deployment)
-const API_BASE_URL = 'https://benkimtracker.vercel.app//api';
+  // Add auth token if available
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
 
-// ============================================
-// API SERVICE CLASS
-// ============================================
-
-class ApiService {
-    constructor() {
-        this.baseUrl = API_BASE_URL;
-        this.token = localStorage.getItem('authToken');
+  try {
+    const response = await fetch(url, config);
+    const data = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(data.error || `HTTP ${response.status}`);
     }
-
-    /**
-     * Make HTTP request to API
-     */
-    async request(endpoint, options = {}) {
-        const url = `${this.baseUrl}${endpoint}`;
-        
-        const config = {
-            headers: {
-                'Content-Type': 'application/json',
-                ...(this.token && { 'Authorization': `Bearer ${this.token}` }),
-                ...options.headers
-            },
-            ...options
-        };
-
-        if (config.body && typeof config.body === 'object') {
-            config.body = JSON.stringify(config.body);
-        }
-
-        try {
-            const response = await fetch(url, config);
-            const data = await response.json();
-            
-            if (!response.ok) {
-                throw new Error(data.error || `HTTP ${response.status}`);
-            }
-            
-            return data;
-        } catch (error) {
-            console.error('API Error:', error);
-            this.showError(error.message);
-            throw error;
-        }
-    }
-
-    // ============================================
-    // STUDENT ENDPOINTS
-    // ============================================
-
-    async getStudents(params = {}) {
-        const query = new URLSearchParams(params).toString();
-        return this.request(`/students?${query}`);
-    }
-
-    async getStudent(id) {
-        return this.request(`/students/${id}`);
-    }
-
-    async registerStudent(studentData) {
-        return this.request('/students', {
-            method: 'POST',
-            body: studentData
-        });
-    }
-
-    // ============================================
-    // ATTENDANCE ENDPOINTS
-    // ============================================
-
-    async markAttendance(sessionId, faceDescriptor) {
-        return this.request('/attendance/mark', {
-            method: 'POST',
-            body: {
-                session_id: sessionId,
-                face_descriptor: faceDescriptor
-            }
-        });
-    }
-
-    async getSessionAttendance(sessionId) {
-        return this.request(`/attendance/session/${sessionId}`);
-    }
-
-    // ============================================
-    // CLASS ENDPOINTS
-    // ============================================
-
-    async getClasses() {
-        return this.request('/classes');
-    }
-
-    async getClass(id) {
-        return this.request(`/classes/${id}`);
-    }
-
-    // ============================================
-    // REPORT ENDPOINTS
-    // ============================================
-
-    async getDailyReport(sessionId) {
-        return this.request(`/reports/daily/${sessionId}`);
-    }
-
-    async getRosterReport(sessionId) {
-        return this.request(`/reports/roster/${sessionId}`);
-    }
-
-    // ============================================
-    // UTILITY METHODS
-    // ============================================
-
-    showError(message) {
-        if (window.showToast) {
-            showToast(message, 'error');
-        } else {
-            alert(message);
-        }
-    }
-
-    setToken(token) {
-        this.token = token;
-        localStorage.setItem('authToken', token);
-    }
-
-    clearToken() {
-        this.token = null;
-        localStorage.removeItem('authToken');
-    }
+    
+    return data;
+  } catch (error) {
+    console.error('API Error:', error);
+    throw error;
+  }
 }
 
-// Create global instance
-const api = new ApiService();
+// API Methods
+const api = {
+  // Health check
+  health: () => apiCall('/health'),
+
+  // Students
+  getStudents: () => apiCall('/students'),
+  getStudent: (id) => apiCall(`/students/${id}`),
+  registerStudent: (data) => apiCall('/students', {
+    method: 'POST',
+    body: JSON.stringify(data)
+  }),
+
+  // Attendance
+  markAttendance: (sessionId, faceDescriptor) => apiCall('/attendance/mark', {
+    method: 'POST',
+    body: JSON.stringify({
+      session_id: sessionId,
+      face_descriptor: faceDescriptor
+    })
+  }),
+  getSessionAttendance: (sessionId) => apiCall(`/attendance/session/${sessionId}`),
+  markManualAttendance: (data) => apiCall('/attendance/manual', {
+    method: 'POST',
+    body: JSON.stringify(data)
+  }),
+
+  // Classes
+  getClasses: () => apiCall('/classes'),
+  getClass: (id) => apiCall(`/classes/${id}`),
+  createClass: (data) => apiCall('/classes', {
+    method: 'POST',
+    body: JSON.stringify(data)
+  }),
+
+  // Reports
+  getDailyReport: (sessionId) => apiCall(`/reports/daily/${sessionId}`),
+  getRosterReport: (sessionId) => apiCall(`/reports/roster/${sessionId}`),
+  getMonthlyReport: (classId, params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    return apiCall(`/reports/monthly/${classId}?${query}`);
+  }
+};
+
+// Toast notification helper
+function showToast(message, type = 'info') {
+  const toast = document.createElement('div');
+  toast.style.cssText = `
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    padding: 1rem 1.5rem;
+    border-radius: 0.5rem;
+    color: white;
+    font-weight: 500;
+    z-index: 1000;
+    animation: slideIn 0.3s ease;
+    ${type === 'success' ? 'background: #10b981;' : 
+      type === 'error' ? 'background: #ef4444;' : 
+      type === 'warning' ? 'background: #f59e0b;' : 'background: #4f46e5;'}
+  `;
+  toast.textContent = message;
+  document.body.appendChild(toast);
+  
+  setTimeout(() => {
+    toast.style.animation = 'slideOut 0.3s ease';
+    setTimeout(() => toast.remove(), 300);
+  }, 3000);
+}
