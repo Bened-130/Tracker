@@ -1,8 +1,19 @@
 {
-  "name": "benedict-academy-tracker",
+  "name": "schoolvibe-tracker",
   "version": "1.0.0",
+  "description": "SchoolVibe AI Attendance Tracker - Netlify Serverless",
   "scripts": {
-    "vercel-build": "echo 'Build complete'"
+    "dev": "netlify dev",
+    "build": "echo 'No build step needed for static frontend'",
+    "deploy": "netlify deploy --prod"
   },
-  "dependencies": {}
+  "dependencies": {
+    "@netlify/functions": "^2.4.0",
+    "@supabase/supabase-js": "^2.38.0",
+    "jsonwebtoken": "^9.0.2",
+    "bcryptjs": "^2.4.3"
+  },
+  "devDependencies": {
+    "netlify-cli": "^17.0.0"
+  }
 }
