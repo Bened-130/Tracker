@@ -1,14 +1,25 @@
 /**
  * Shared Application Logic
- * 
- * Common functionality used across all pages.
  */
 
 // Initialize on DOM ready
 document.addEventListener('DOMContentLoaded', () => {
   loadClasses();
   checkAuth();
+  initMobileMenu();
 });
+
+// Mobile menu toggle
+function initMobileMenu() {
+  const menuBtn = document.querySelector('.mobile-menu-btn');
+  const navLinks = document.querySelector('.nav-links');
+  
+  if (menuBtn && navLinks) {
+    menuBtn.addEventListener('click', () => {
+      navLinks.classList.toggle('active');
+    });
+  }
+}
 
 // Load classes into all dropdowns
 async function loadClasses() {
