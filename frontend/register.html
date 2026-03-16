@@ -79,18 +79,34 @@
                     Capture 5 photos from different angles for accurate recognition
                 </p>
                 
-                <div class="camera-container" style="margin-bottom: 1rem;">
-                    <video id="video" class="camera-video" autoplay playsinline></video>
-                    <canvas id="overlay" class="camera-overlay"></canvas>
+                <!-- Camera Container -->
+                <div class="camera-container" style="margin-bottom: 1rem; position: relative;">
+                    <video 
+                        id="video" 
+                        class="camera-video" 
+                        autoplay 
+                        playsinline 
+                        muted
+                        style="width: 100%; height: 100%; object-fit: cover;"
+                    ></video>
+                    <canvas 
+                        id="overlay" 
+                        class="camera-overlay"
+                        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;"
+                    ></canvas>
                     <div class="scan-line" id="scanLine" style="display: none;"></div>
                     
                     <div class="camera-controls">
                         <span class="camera-badge" id="captureCount">0 / 5 captured</span>
-                        <span class="camera-badge" id="cameraStatus">Ready</span>
+                        <span class="camera-badge" id="cameraStatus">Click Start Camera</span>
                     </div>
                 </div>
                 
-                <div id="photoThumbnails" style="display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap;"></div>
+                <!-- Thumbnails -->
+                <div id="photoThumbnails" style="display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap; min-height: 90px;"></div>
+                
+                <!-- Error Message -->
+                <div id="cameraError" style="color: #ef4444; font-size: 0.875rem; margin-bottom: 1rem; display: none;"></div>
                 
                 <div style="display: flex; gap: 0.75rem;">
                     <button type="button" id="startCameraBtn" class="btn btn-secondary" onclick="startCamera()">
@@ -110,6 +126,7 @@
         </div>
     </main>
 
+    <!-- Load face-api.js -->
     <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
     <script src="js/api.js"></script>
     <script src="js/app.js"></script>
@@ -118,73 +135,146 @@
     <script>
         let stream = null;
         let capturedDescriptors = [];
+        let isProcessing = false;
+        
         const video = document.getElementById('video');
         const overlay = document.getElementById('overlay');
+        const captureBtn = document.getElementById('captureBtn');
+        const startCameraBtn = document.getElementById('startCameraBtn');
+        const cameraStatus = document.getElementById('cameraStatus');
+        const captureCount = document.getElementById('captureCount');
+        const cameraError = document.getElementById('cameraError');
+        
+        function showError(msg) {
+            cameraError.textContent = msg;
+            cameraError.style.display = 'block';
+            setTimeout(() => cameraError.style.display = 'none', 5000);
+        }
         
         async function startCamera() {
             try {
+                cameraStatus.textContent = 'Requesting camera...';
+                
+                // Request camera with specific constraints
                 stream = await navigator.mediaDevices.getUserMedia({
-                    video: { width: 640, height: 480, facingMode: 'user' },
+                    video: { 
+                        width: { ideal: 640 },
+                        height: { ideal: 480 },
+                        facingMode: 'user'
+                    },
                     audio: false
                 });
                 
                 video.srcObject = stream;
                 
-                video.onloadedmetadata = () => {
-                    overlay.width = video.videoWidth;
-                    overlay.height = video.videoHeight;
-                    document.getElementById('captureBtn').disabled = false;
-                    document.getElementById('cameraStatus').textContent = 'Camera active';
-                    document.getElementById('scanLine').style.display = 'block';
-                    showToast('Camera started', 'success');
-                };
+                // Wait for video to be ready
+                await new Promise((resolve) => {
+                    video.onloadedmetadata = () => {
+                        resolve();
+                    };
+                });
+                
+                await video.play();
+                
+                // Set canvas dimensions to match video
+                overlay.width = video.videoWidth;
+                overlay.height = video.videoHeight;
+                
+                // Load face-api models
+                cameraStatus.textContent = 'Loading AI models...';
+                await faceService.loadModels();
+                
+                // Enable capture button
+                captureBtn.disabled = false;
+                startCameraBtn.disabled = true;
+                startCameraBtn.textContent = 'Camera Active';
+                
+                document.getElementById('scanLine').style.display = 'block';
+                cameraStatus.textContent = 'Ready - Position your face';
+                
+                showToast('Camera started successfully', 'success');
                 
             } catch (error) {
                 console.error('Camera error:', error);
-                showToast('Camera access denied', 'error');
+                showError('Camera error: ' + error.message);
+                cameraStatus.textContent = 'Camera failed';
             }
         }
         
         async function capturePhoto() {
-            if (!stream) return;
-            
-            const detection = await faceService.detectFace(video);
-            
-            if (!detection) {
-                showToast('No face detected. Please position your face in the frame.', 'warning');
+            if (isProcessing) return;
+            if (capturedDescriptors.length >= 5) {
+                showToast('All 5 photos already captured!', 'warning');
                 return;
             }
             
-            const ctx = overlay.getContext('2d');
-            ctx.clearRect(0, 0, overlay.width, overlay.height);
-            faceService.drawDetection(overlay, detection, `Photo ${capturedDescriptors.length + 1}`);
+            isProcessing = true;
+            captureBtn.disabled = true;
+            captureBtn.textContent = 'Processing...';
+            cameraStatus.textContent = 'Detecting face...';
             
-            capturedDescriptors.push(Array.from(detection.descriptor));
-            
-            const thumbUrl = faceService.createThumbnail(video, 80);
-            const thumbDiv = document.createElement('div');
-            thumbDiv.innerHTML = `<img src="${thumbUrl}" style="width: 80px; height: 80px; border-radius: 8px; border: 2px solid #4f46e5;">`;
-            document.getElementById('photoThumbnails').appendChild(thumbDiv);
-            
-            document.getElementById('captureCount').textContent = `${capturedDescriptors.length} / 5 captured`;
-            
-            if (capturedDescriptors.length >= 5) {
-                document.getElementById('submitBtn').disabled = false;
-                showToast('All photos captured! Ready to submit.', 'success');
-            } else {
-                showToast(`Photo ${capturedDescriptors.length} captured. Need ${5 - capturedDescriptors.length} more.`, 'info');
+            try {
+                // Detect face
+                const detection = await faceService.detectFace(video);
+                
+                if (!detection) {
+                    showError('No face detected. Please look at the camera and try again.');
+                    cameraStatus.textContent = 'No face detected - try again';
+                    isProcessing = false;
+                    captureBtn.disabled = false;
+                    captureBtn.textContent = 'Capture Photo';
+                    return;
+                }
+                
+                // Draw detection on overlay
+                faceService.drawDetection(overlay, detection, `Photo ${capturedDescriptors.length + 1}`);
+                
+                // Save descriptor
+                const descriptor = Array.from(detection.descriptor);
+                capturedDescriptors.push(descriptor);
+                
+                // Create thumbnail
+                const thumbUrl = faceService.createThumbnail(video, 80);
+                const thumbDiv = document.createElement('div');
+                thumbDiv.innerHTML = `
+                    <img src="${thumbUrl}" style="width: 80px; height: 80px; border-radius: 8px; border: 3px solid #10b981; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                `;
+                document.getElementById('photoThumbnails').appendChild(thumbDiv);
+                
+                // Update UI
+                captureCount.textContent = `${capturedDescriptors.length} / 5 captured`;
+                cameraStatus.textContent = 'Face captured!';
+                
+                // Flash effect
+                const flash = document.createElement('div');
+                flash.style.cssText = 'position: absolute; inset: 0; background: white; opacity: 0.6; pointer-events: none; z-index: 10;';
+                video.parentElement.appendChild(flash);
+                setTimeout(() => flash.remove(), 150);
+                
+                if (capturedDescriptors.length >= 5) {
+                    document.getElementById('submitBtn').disabled = false;
+                    showToast('All photos captured! Ready to submit.', 'success');
+                    cameraStatus.textContent = 'All photos captured';
+                } else {
+                    showToast(`Photo ${capturedDescriptors.length} captured. Need ${5 - capturedDescriptors.length} more.`, 'info');
+                    cameraStatus.textContent = 'Ready for next photo';
+                }
+                
+            } catch (error) {
+                console.error('Capture error:', error);
+                showError('Capture failed: ' + error.message);
+                cameraStatus.textContent = 'Error - try again';
+            } finally {
+                isProcessing = false;
+                captureBtn.disabled = false;
+                captureBtn.textContent = 'Capture Photo';
             }
-            
-            const flash = document.createElement('div');
-            flash.style.cssText = 'position: absolute; inset: 0; background: white; opacity: 0.5; pointer-events: none;';
-            video.parentElement.appendChild(flash);
-            setTimeout(() => flash.remove(), 100);
         }
         
         async function submitRegistration() {
-            const firstName = document.getElementById('firstName').value;
-            const lastName = document.getElementById('lastName').value;
-            const email = document.getElementById('email').value;
+            const firstName = document.getElementById('firstName').value.trim();
+            const lastName = document.getElementById('lastName').value.trim();
+            const email = document.getElementById('email').value.trim();
             const classId = document.getElementById('classId').value;
             
             if (!firstName || !lastName || !email) {
@@ -212,17 +302,27 @@
                 
                 showToast('Student registered successfully!', 'success');
                 
+                // Reset form
                 document.getElementById('registrationForm').reset();
                 capturedDescriptors = [];
                 document.getElementById('photoThumbnails').innerHTML = '';
-                document.getElementById('captureCount').textContent = '0 / 5 captured';
+                captureCount.textContent = '0 / 5 captured';
                 submitBtn.disabled = true;
                 submitBtn.textContent = 'Complete Registration';
                 
+                // Stop camera
                 if (stream) {
                     stream.getTracks().forEach(track => track.stop());
                     stream = null;
+                    video.srcObject = null;
                 }
+                
+                startCameraBtn.disabled = false;
+                startCameraBtn.textContent = 'Start Camera';
+                captureBtn.disabled = true;
+                cameraStatus.textContent = 'Click Start Camera';
+                document.getElementById('scanLine').style.display = 'none';
+                overlay.getContext('2d').clearRect(0, 0, overlay.width, overlay.height);
                 
             } catch (error) {
                 showToast('Registration failed: ' + error.message, 'error');
@@ -231,6 +331,7 @@
             }
         }
         
+        // Cleanup on page unload
         window.addEventListener('beforeunload', () => {
             if (stream) {
                 stream.getTracks().forEach(track => track.stop());
