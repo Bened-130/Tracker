@@ -17,7 +17,7 @@
             <a href="index.html" class="nav-brand">
                 <div class="nav-logo">BA</div>
                 <div>
-                    <div class="nav-title">BENEDICT ACADEMY</div>
+                    <div class="nav-title">SchoolVibe AI</div>
                     <div class="nav-subtitle">Smart Attendance Tracker</div>
                 </div>
             </a>
@@ -51,21 +51,32 @@
                     <span class="badge badge-present" id="statusBadge">Ready</span>
                 </div>
                 
-                <div class="camera-container" style="margin-bottom: 1rem;">
-                    <video id="video" class="camera-video" autoplay playsinline></video>
-                    <canvas id="overlay" class="camera-overlay"></canvas>
-                    <div class="scan-line" id="scanLine"></div>
+                <div class="camera-container" style="margin-bottom: 1rem; position: relative;">
+                    <video 
+                        id="video" 
+                        class="camera-video" 
+                        autoplay 
+                        playsinline
+                        muted
+                        style="width: 100%; height: 100%; object-fit: cover;"
+                    ></video>
+                    <canvas 
+                        id="overlay" 
+                        class="camera-overlay"
+                        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;"
+                    ></canvas>
+                    <div class="scan-line" id="scanLine" style="display: none;"></div>
                     
                     <div class="camera-controls">
-                        <span class="camera-badge" id="matchStatus">Waiting for face...</span>
+                        <span class="camera-badge" id="matchStatus">Click Start Check-in</span>
                     </div>
                 </div>
                 
                 <div style="display: flex; gap: 0.75rem;">
-                    <button type="button" class="btn btn-primary" onclick="startCheckIn()">
+                    <button type="button" id="startBtn" class="btn btn-primary" onclick="startCheckIn()">
                         Start Check-in
                     </button>
-                    <button type="button" class="btn btn-secondary" onclick="stopCheckIn()">
+                    <button type="button" id="stopBtn" class="btn btn-secondary" onclick="stopCheckIn()" disabled>
                         Stop
                     </button>
                 </div>
@@ -92,7 +103,7 @@
 
                 <div class="card">
                     <h2 class="card-title">✓ Recent Check-ins</h2>
-                    <div id="recentCheckins" style="display: flex; flex-direction: column; gap: 0.75rem;">
+                    <div id="recentCheckins" style="display: flex; flex-direction: column; gap: 0.75rem; max-height: 300px; overflow-y: auto;">
                         <p style="color: #6b7280; text-align: center; padding: 1rem;">
                             No check-ins yet today
                         </p>
@@ -110,9 +121,15 @@
     <script>
         let stream = null;
         let isChecking = false;
-        let checkInInterval = null;
+        let checkInterval = null;
+        let lastCheckTime = 0;
+        
         const video = document.getElementById('video');
         const overlay = document.getElementById('overlay');
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const statusBadge = document.getElementById('statusBadge');
+        const matchStatus = document.getElementById('matchStatus');
         
         async function loadSessions() {
             const classId = document.getElementById('classSelect').value;
@@ -155,68 +172,106 @@
             }
             
             try {
+                matchStatus.textContent = 'Starting camera...';
+                
+                // Start camera
                 stream = await navigator.mediaDevices.getUserMedia({
-                    video: { width: 640, height: 480, facingMode: 'user' },
+                    video: { 
+                        width: { ideal: 640 },
+                        height: { ideal: 480 },
+                        facingMode: 'user'
+                    },
                     audio: false
                 });
                 
                 video.srcObject = stream;
                 
-                video.onloadedmetadata = () => {
-                    overlay.width = video.videoWidth;
-                    overlay.height = video.videoHeight;
-                    isChecking = true;
-                    document.getElementById('statusBadge').textContent = 'Scanning';
-                    document.getElementById('statusBadge').className = 'badge badge-late';
-                    
-                    checkInInterval = setInterval(detectAndCheckIn, 1000);
-                    showToast('Check-in started. Look at the camera.', 'success');
-                };
+                await new Promise((resolve) => {
+                    video.onloadedmetadata = () => resolve();
+                });
+                await video.play();
+                
+                // Set canvas size
+                overlay.width = video.videoWidth;
+                overlay.height = video.videoHeight;
+                
+                // Load models
+                matchStatus.textContent = 'Loading AI models...';
+                await faceService.loadModels();
+                
+                // Start detection loop
+                isChecking = true;
+                startBtn.disabled = true;
+                stopBtn.disabled = false;
+                document.getElementById('scanLine').style.display = 'block';
+                statusBadge.textContent = 'Scanning';
+                statusBadge.className = 'badge badge-late';
+                matchStatus.textContent = 'Looking for face...';
+                
+                // Run detection every 1.5 seconds
+                checkInterval = setInterval(detectAndCheckIn, 1500);
+                
+                showToast('Check-in started. Look at the camera.', 'success');
                 
             } catch (error) {
-                showToast('Camera access denied', 'error');
+                console.error('Check-in error:', error);
+                showToast('Failed to start: ' + error.message, 'error');
+                matchStatus.textContent = 'Error - try again';
             }
         }
         
         async function detectAndCheckIn() {
             if (!isChecking) return;
             
-            const detection = await faceService.detectFace(video);
-            const ctx = overlay.getContext('2d');
-            ctx.clearRect(0, 0, overlay.width, overlay.height);
-            
-            if (!detection) {
-                document.getElementById('matchStatus').textContent = 'No face detected';
-                return;
-            }
-            
-            faceService.drawDetection(overlay, detection);
-            document.getElementById('matchStatus').textContent = 'Face detected - processing...';
-            
-            const sessionId = document.getElementById('sessionSelect').value;
+            // Prevent overlapping calls
+            const now = Date.now();
+            if (now - lastCheckTime < 1000) return;
+            lastCheckTime = now;
             
             try {
+                const detection = await faceService.detectFace(video);
+                const ctx = overlay.getContext('2d');
+                ctx.clearRect(0, 0, overlay.width, overlay.height);
+                
+                if (!detection) {
+                    matchStatus.textContent = 'No face detected - move closer';
+                    return;
+                }
+                
+                // Draw face box
+                faceService.drawDetection(overlay, detection, 'Scanning...');
+                matchStatus.textContent = 'Face found - processing...';
+                
+                const sessionId = document.getElementById('sessionSelect').value;
+                
+                // Call API to mark attendance
                 const response = await api.markAttendance(
                     sessionId,
                     Array.from(detection.descriptor)
                 );
                 
+                // Success!
                 faceService.drawDetection(overlay, detection, response.data.name);
-                document.getElementById('matchStatus').textContent = `✓ ${response.data.name} checked in!`;
-                document.getElementById('statusBadge').textContent = 'Success';
-                document.getElementById('statusBadge').className = 'badge badge-present';
+                matchStatus.textContent = `✓ ${response.data.name} checked in!`;
+                statusBadge.textContent = 'Success';
+                statusBadge.className = 'badge badge-present';
                 
                 addRecentCheckin(response.data);
                 
+                // Auto-stop after success
                 setTimeout(stopCheckIn, 2000);
                 
             } catch (error) {
+                console.error('Detection error:', error);
+                
                 if (error.message.includes('already')) {
-                    document.getElementById('matchStatus').textContent = 'Already checked in';
+                    matchStatus.textContent = 'Already checked in today';
+                    statusBadge.textContent = 'Duplicate';
                 } else if (error.message.includes('No matching')) {
-                    document.getElementById('matchStatus').textContent = 'Face not recognized';
+                    matchStatus.textContent = 'Face not recognized';
+                    statusBadge.textContent = 'Unknown';
                 } else {
-                    document.getElementById('matchStatus').textContent = 'Error - try again';
+                    matchStatus.textContent = 'Error - will retry';
                 }
             }
         }
@@ -229,9 +284,9 @@
             }
             
             const item = document.createElement('div');
-            item.style.cssText = 'display: flex; align-items: center; gap: 1rem; padding: 0.75rem; background: #f0fdf4; border-radius: 0.5rem; border-left: 4px solid #10b981;';
+            item.style.cssText = 'display: flex; align-items: center; gap: 1rem; padding: 0.75rem; background: #f0fdf4; border-radius: 0.5rem; border-left: 4px solid #10b981; animation: slideIn 0.3s ease;';
             item.innerHTML = `
-                <div style="width: 40px; height: 40px; background: #d1fae5; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                <div style="width: 40px; height: 40px; background: #d1fae5; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.25rem;">
                     ✓
                 </div>
                 <div style="flex: 1;">
@@ -253,9 +308,9 @@
         function stopCheckIn() {
             isChecking = false;
             
-            if (checkInInterval) {
-                clearInterval(checkInInterval);
-                checkInInterval = null;
+            if (checkInterval) {
+                clearInterval(checkInterval);
+                checkInterval = null;
             }
             
             if (stream) {
@@ -266,9 +321,12 @@
             const ctx = overlay.getContext('2d');
             ctx.clearRect(0, 0, overlay.width, overlay.height);
             
-            document.getElementById('statusBadge').textContent = 'Ready';
-            document.getElementById('statusBadge').className = 'badge badge-present';
-            document.getElementById('matchStatus').textContent = 'Waiting for face...';
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+            document.getElementById('scanLine').style.display = 'none';
+            statusBadge.textContent = 'Ready';
+            statusBadge.className = 'badge badge-present';
+            matchStatus.textContent = 'Click Start Check-in';
         }
         
         window.addEventListener('beforeunload', stopCheckIn);
