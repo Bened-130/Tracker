@@ -3,136 +3,275 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Check-in - BENEDICT ACADEMY</title>
-    <link rel="stylesheet" href="../css/styles.css">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <title>Check-in - SchoolVibe AI</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="css/styles.css">
 </head>
-<body class="bg-slate-900 text-white min-h-screen">
-    <video class="video-bg" autoplay muted loop playsinline>
-        <source src="https://assets.mixkit.co/videos/preview/mixkit-digital-animation-of-a-blue-network-of-connections-29358-large.mp4" type="video/mp4">
-    </video>
-    <div class="fixed inset-0 grid-bg pointer-events-none z-0"></div>
-
-    <nav class="glass-strong sticky top-0 z-40 px-6 py-4">
-        <div class="max-w-7xl mx-auto flex items-center justify-between">
-            <a href="../index.html" class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
-                    <i data-lucide="scan-face" class="w-6 h-6 text-white"></i>
-                </div>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="nav-brand">
+                <div class="nav-logo">📚</div>
                 <div>
-                    <h1 class="text-xl font-bold gradient-text">BENEDICT ACADEMY</h1>
+                    <div class="nav-title">SchoolVibe AI</div>
+                    <div class="nav-subtitle">Smart Attendance Tracker</div>
                 </div>
             </a>
-            <div class="flex items-center gap-4">
-                <a href="dashboard.html" class="nav-btn glass px-4 py-2 rounded-lg hover:bg-white/10 text-sm font-medium">Dashboard</a>
-                <a href="register.html" class="nav-btn glass px-4 py-2 rounded-lg hover:bg-white/10 text-sm font-medium">Register</a>
-                <a href="checkin.html" class="nav-btn glass px-4 py-2 rounded-lg bg-indigo-600/30 text-sm font-medium">Check-in</a>
-                <a href="reports.html" class="nav-btn glass px-4 py-2 rounded-lg hover:bg-white/10 text-sm font-medium">Reports</a>
-            </div>
+            
+            <button class="mobile-menu-btn" aria-label="Toggle menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            
+            <ul class="nav-links">
+                <li><a href="index.html" class="nav-link">Home</a></li>
+                <li><a href="dashboard.html" class="nav-link">Dashboard</a></li>
+                <li><a href="register.html" class="nav-link">Register</a></li>
+                <li><a href="checkin.html" class="nav-link active">Check-in</a></li>
+                <li><a href="reports.html" class="nav-link">Reports</a></li>
+            </ul>
         </div>
     </nav>
 
-    <main class="relative z-10 max-w-6xl mx-auto p-6">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="lg:col-span-2 glass-card rounded-2xl p-6">
-                <div class="flex items-center justify-between mb-6">
-                    <div>
-                        <h2 class="text-2xl font-bold gradient-text">Face Verification</h2>
-                        <p class="text-gray-400 text-sm">Position your face in the frame for attendance</p>
-                    </div>
-                    <div class="glass px-4 py-2 rounded-full flex items-center gap-2">
-                        <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                        <span class="text-sm font-medium">Live</span>
+    <main class="container">
+        <div class="page-header">
+            <h1 class="page-title">Face Check-in</h1>
+            <p class="page-description">Look at the camera to mark your attendance</p>
+        </div>
+
+        <div class="grid-2">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">📷 Camera</h2>
+                    <span class="badge badge-present" id="statusBadge">Ready</span>
+                </div>
+                
+                <div class="camera-container" style="margin-bottom: 1rem;">
+                    <video id="video" class="camera-video" autoplay playsinline></video>
+                    <canvas id="overlay" class="camera-overlay"></canvas>
+                    <div class="scan-line" id="scanLine"></div>
+                    
+                    <div class="camera-controls">
+                        <span class="camera-badge" id="matchStatus">Waiting for face...</span>
                     </div>
                 </div>
                 
-                <div class="relative rounded-2xl overflow-hidden bg-black/50 aspect-video border-2 border-indigo-500/30 shadow-2xl">
-                    <video id="checkinVideo" class="w-full h-full object-cover" autoplay muted playsinline></video>
-                    <canvas id="checkinCanvas" class="absolute inset-0 w-full h-full"></canvas>
-                    <div class="scan-line"></div>
-                    <div id="detectionOverlays" class="absolute inset-0 pointer-events-none"></div>
-                    
-                    <div id="maskWarning" class="absolute top-4 left-1/2 transform -translate-x-1/2 glass-strong px-6 py-3 rounded-full hidden">
-                        <div class="flex items-center gap-2 text-yellow-400">
-                            <i data-lucide="alert-triangle" class="w-5 h-5"></i>
-                            <span class="font-medium">Mask detected - Please remove for verification</span>
-                        </div>
-                    </div>
-                    
-                    <div id="verificationResult" class="absolute bottom-8 left-1/2 transform -translate-x-1/2 hidden">
-                        <div class="glass-strong px-8 py-4 rounded-2xl flex items-center gap-4">
-                            <div id="resultIcon" class="w-12 h-12 rounded-full flex items-center justify-center"></div>
-                            <div>
-                                <div id="resultText" class="font-bold text-lg"></div>
-                                <div id="resultSubtext" class="text-sm text-gray-400"></div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div id="checkinLoading" class="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center hidden">
-                        <div class="text-center">
-                            <div class="loading-spinner mx-auto mb-4"></div>
-                            <p class="text-indigo-400 font-medium">Processing...</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="mt-6 flex items-center justify-between">
-                    <div class="flex items-center gap-4">
-                        <button onclick="startCheckinCamera()" class="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 px-6 rounded-xl transition-all flex items-center gap-2">
-                            <i data-lucide="video" class="w-5 h-5"></i>
-                            Start Camera
-                        </button>
-                        <button onclick="stopCheckinCamera()" class="glass hover:bg-white/10 text-white font-semibold py-3 px-6 rounded-xl transition-all flex items-center gap-2">
-                            <i data-lucide="video-off" class="w-5 h-5"></i>
-                            Stop
-                        </button>
-                    </div>
-                    <div class="text-sm text-gray-400">
-                        Threshold: <span class="text-indigo-400 font-mono">0.6</span> Euclidean distance
-                    </div>
+                <div style="display: flex; gap: 0.75rem;">
+                    <button type="button" class="btn btn-primary" onclick="startCheckIn()">
+                        Start Check-in
+                    </button>
+                    <button type="button" class="btn btn-secondary" onclick="stopCheckIn()">
+                        Stop
+                    </button>
                 </div>
             </div>
-            
-            <div class="space-y-6">
-                <div class="glass-card rounded-2xl p-6">
-                    <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
-                        <i data-lucide="settings" class="w-5 h-5 text-indigo-400"></i>
-                        Session Settings
-                    </h3>
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-sm text-gray-400 mb-2">Select Class</label>
-                            <select id="checkinClass" class="w-full glass bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-500">
-                                <option value="">Select Class</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm text-gray-400 mb-2">Session Date</label>
-                            <input type="date" id="checkinDate" class="w-full glass bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-500">
-                        </div>
+
+            <div>
+                <div class="card" style="margin-bottom: 1.5rem;">
+                    <h2 class="card-title">📅 Select Session</h2>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Class</label>
+                        <select id="classSelect" class="form-select class-select" onchange="loadSessions()">
+                            <option value="">Select a class</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Session</label>
+                        <select id="sessionSelect" class="form-select" disabled>
+                            <option value="">Select a session</option>
+                        </select>
                     </div>
                 </div>
-                
-                <div class="glass-card rounded-2xl p-6">
-                    <h3 class="text-lg font-semibold mb-4">Recent Verifications</h3>
-                    <div id="recentVerifications" class="space-y-3 max-h-64 overflow-y-auto"></div>
+
+                <div class="card">
+                    <h2 class="card-title">✓ Recent Check-ins</h2>
+                    <div id="recentCheckins" style="display: flex; flex-direction: column; gap: 0.75rem;">
+                        <p style="color: #6b7280; text-align: center; padding: 1rem;">
+                            No check-ins yet today
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
     </main>
 
-    <div id="toastContainer" class="fixed bottom-6 right-6 z-50 space-y-3"></div>
-
-    <script src="../js/api.js"></script>
-    <script src="../js/faceRecognition.js"></script>
-    <script src="../js/camera.js"></script>
-    <script src="../js/checkin.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/faceRecognition.js"></script>
+    
     <script>
-        lucide.createIcons();
-        document.getElementById('checkinDate').valueAsDate = new Date();
+        let stream = null;
+        let isChecking = false;
+        let checkInInterval = null;
+        const video = document.getElementById('video');
+        const overlay = document.getElementById('overlay');
+        
+        async function loadSessions() {
+            const classId = document.getElementById('classSelect').value;
+            const sessionSelect = document.getElementById('sessionSelect');
+            
+            if (!classId) {
+                sessionSelect.disabled = true;
+                sessionSelect.innerHTML = '<option value="">Select a session</option>';
+                return;
+            }
+            
+            try {
+                const response = await api.getClass(classId);
+                const sessions = response.data.sessions || [];
+                
+                const today = new Date().toISOString().split('T')[0];
+                const relevantSessions = sessions.filter(s => s.session_date >= today);
+                
+                sessionSelect.innerHTML = '<option value="">Select a session</option>';
+                relevantSessions.forEach(session => {
+                    const option = document.createElement('option');
+                    option.value = session.session_id;
+                    option.textContent = `${session.session_date} (${session.start_time} - ${session.end_time})`;
+                    sessionSelect.appendChild(option);
+                });
+                
+                sessionSelect.disabled = false;
+                
+            } catch (error) {
+                showToast('Failed to load sessions', 'error');
+            }
+        }
+        
+        async function startCheckIn() {
+            const sessionId = document.getElementById('sessionSelect').value;
+            
+            if (!sessionId) {
+                showToast('Please select a session first', 'warning');
+                return;
+            }
+            
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: { width: 640, height: 480, facingMode: 'user' },
+                    audio: false
+                });
+                
+                video.srcObject = stream;
+                
+                video.onloadedmetadata = () => {
+                    overlay.width = video.videoWidth;
+                    overlay.height = video.videoHeight;
+                    isChecking = true;
+                    document.getElementById('statusBadge').textContent = 'Scanning';
+                    document.getElementById('statusBadge').className = 'badge badge-late';
+                    
+                    checkInInterval = setInterval(detectAndCheckIn, 1000);
+                    showToast('Check-in started. Look at the camera.', 'success');
+                };
+                
+            } catch (error) {
+                showToast('Camera access denied', 'error');
+            }
+        }
+        
+        async function detectAndCheckIn() {
+            if (!isChecking) return;
+            
+            const detection = await faceService.detectFace(video);
+            const ctx = overlay.getContext('2d');
+            ctx.clearRect(0, 0, overlay.width, overlay.height);
+            
+            if (!detection) {
+                document.getElementById('matchStatus').textContent = 'No face detected';
+                return;
+            }
+            
+            faceService.drawDetection(overlay, detection);
+            document.getElementById('matchStatus').textContent = 'Face detected - processing...';
+            
+            const sessionId = document.getElementById('sessionSelect').value;
+            
+            try {
+                const response = await api.markAttendance(
+                    sessionId,
+                    Array.from(detection.descriptor)
+                );
+                
+                faceService.drawDetection(overlay, detection, response.data.name);
+                document.getElementById('matchStatus').textContent = `✓ ${response.data.name} checked in!`;
+                document.getElementById('statusBadge').textContent = 'Success';
+                document.getElementById('statusBadge').className = 'badge badge-present';
+                
+                addRecentCheckin(response.data);
+                
+                setTimeout(stopCheckIn, 2000);
+                
+            } catch (error) {
+                if (error.message.includes('already')) {
+                    document.getElementById('matchStatus').textContent = 'Already checked in';
+                } else if (error.message.includes('No matching')) {
+                    document.getElementById('matchStatus').textContent = 'Face not recognized';
+                } else {
+                    document.getElementById('matchStatus').textContent = 'Error - try again';
+                }
+            }
+        }
+        
+        function addRecentCheckin(data) {
+            const container = document.getElementById('recentCheckins');
+            
+            if (container.querySelector('p')) {
+                container.innerHTML = '';
+            }
+            
+            const item = document.createElement('div');
+            item.style.cssText = 'display: flex; align-items: center; gap: 1rem; padding: 0.75rem; background: #f0fdf4; border-radius: 0.5rem; border-left: 4px solid #10b981;';
+            item.innerHTML = `
+                <div style="width: 40px; height: 40px; background: #d1fae5; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                    ✓
+                </div>
+                <div style="flex: 1;">
+                    <div style="font-weight: 600;">${data.name}</div>
+                    <div style="font-size: 0.75rem; color: #6b7280;">
+                        ${new Date(data.timestamp).toLocaleTimeString()}
+                    </div>
+                </div>
+                <span class="badge badge-${data.status}">${data.status}</span>
+            `;
+            
+            container.insertBefore(item, container.firstChild);
+            
+            while (container.children.length > 5) {
+                container.removeChild(container.lastChild);
+            }
+        }
+        
+        function stopCheckIn() {
+            isChecking = false;
+            
+            if (checkInInterval) {
+                clearInterval(checkInInterval);
+                checkInInterval = null;
+            }
+            
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                stream = null;
+            }
+            
+            const ctx = overlay.getContext('2d');
+            ctx.clearRect(0, 0, overlay.width, overlay.height);
+            
+            document.getElementById('statusBadge').textContent = 'Ready';
+            document.getElementById('statusBadge').className = 'badge badge-present';
+            document.getElementById('matchStatus').textContent = 'Waiting for face...';
+        }
+        
+        window.addEventListener('beforeunload', stopCheckIn);
     </script>
 </body>
 </html>
