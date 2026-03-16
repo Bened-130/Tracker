@@ -3,98 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BENEDICT ACADEMY</title>
+    <title>SchoolVibe AI - Smart Attendance Tracker</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
     <link rel="stylesheet" href="css/styles.css">
-    <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
     <!-- Navigation -->
     <nav class="navbar">
-        <div class="navbar-content">
-            <a href="index.html" class="logo">
-                <div class="logo-icon">
-                    <i data-lucide="scan-face" style="width: 24px; height: 24px;"></i>
-                </div>
-                <div class="logo-text">
-                    <h1>BENEDICT ACADEMY</h1>
-                    <p>Smart Attendance Tracker</p>
+        <div class="nav-container">
+            <a href="index.html" class="nav-brand">
+                <div class="nav-logo">📚</div>
+                <div>
+                    <div class="nav-title">SchoolVibe AI</div>
+                    <div class="nav-subtitle">Smart Attendance Tracker</div>
                 </div>
             </a>
-            <div class="nav-links">
-                <a href="index.html" class="nav-link active">Home</a>
-                <a href="dashboard.html" class="nav-link">Dashboard</a>
-                <a href="register.html" class="nav-link">Register</a>
-                <a href="checkin.html" class="nav-link">Check-in</a>
-                <a href="reports.html" class="nav-link">Reports</a>
-            </div>
+            
+            <!-- Mobile Menu Button (Right Side) -->
+            <button class="mobile-menu-btn" aria-label="Toggle menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            
+            <ul class="nav-links">
+                <li><a href="index.html" class="nav-link active">Home</a></li>
+                <li><a href="dashboard.html" class="nav-link">Dashboard</a></li>
+                <li><a href="register.html" class="nav-link">Register</a></li>
+                <li><a href="checkin.html" class="nav-link">Check-in</a></li>
+                <li><a href="reports.html" class="nav-link">Reports</a></li>
+            </ul>
         </div>
     </nav>
 
-    <!-- Main Content -->
+    <!-- Hero Section -->
     <main class="container">
-        <div class="card" style="text-align: center; padding: 4rem 2rem;">
-            <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; color: white;">
-                <i data-lucide="scan-face" style="width: 40px; height: 40px;"></i>
-            </div>
-            <h1 style="font-size: 2.5rem; font-weight: 800; color: #111827; margin-bottom: 1rem;">
-                Welcome to BENEDICT ACADEMY
+        <div style="text-align: center; padding: 4rem 0;">
+            <h1 style="font-size: 3rem; font-weight: 700; color: #111827; margin-bottom: 1rem;">
+                Smart Attendance with<br>
+                <span style="color: #4f46e5;">Face Recognition</span>
             </h1>
-            <p style="font-size: 1.125rem; color: #6b7280; max-width: 600px; margin: 0 auto 2rem;">
-                Next generation attendance tracking with facial recognition technology. 
-                Secure, fast, and intelligent.
+            <p style="font-size: 1.25rem; color: #6b7280; max-width: 600px; margin: 0 auto 2rem;">
+                Automate your school's attendance system with AI-powered face recognition. 
+                Fast, secure, and contactless.
             </p>
-            <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-                <a href="checkin.html" class="btn btn-primary" style="padding: 0.875rem 2rem; font-size: 1rem;">
-                    <i data-lucide="scan-face" style="width: 20px; height: 20px;"></i>
-                    Start Check-in
-                </a>
-                <a href="register.html" class="btn btn-secondary" style="padding: 0.875rem 2rem; font-size: 1rem;">
-                    <i data-lucide="user-plus" style="width: 20px; height: 20px;"></i>
+            
+            <div style="display: flex; gap: 1rem; justify-content: center; margin-bottom: 4rem; flex-wrap: wrap;">
+                <a href="register.html" class="btn btn-primary" style="font-size: 1.125rem; padding: 1rem 2rem;">
                     Register Student
                 </a>
+                <a href="checkin.html" class="btn btn-secondary" style="font-size: 1.125rem; padding: 1rem 2rem;">
+                    Check In
+                </a>
             </div>
-        </div>
 
-        <!-- Features -->
-        <div class="stats-grid" style="margin-top: 2rem;">
-            <div class="card">
-                <div class="stat-icon blue" style="margin-bottom: 1rem;">
-                    <i data-lucide="scan-face" style="width: 24px; height: 24px;"></i>
+            <!-- Features Grid -->
+            <div class="grid-3" style="text-align: left;">
+                <div class="card" style="text-align: center;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">🎯</div>
+                    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">99% Accuracy</h3>
+                    <p style="color: #6b7280;">State-of-the-art face recognition with 128-point facial mapping.</p>
                 </div>
-                <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.5rem;">Facial Recognition</h3>
-                <p style="color: #6b7280; font-size: 0.875rem;">128-dimensional face descriptors for accurate matching</p>
-            </div>
-            <div class="card">
-                <div class="stat-icon green" style="margin-bottom: 1rem;">
-                    <i data-lucide="activity" style="width: 24px; height: 24px;"></i>
+                
+                <div class="card" style="text-align: center;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">⚡</div>
+                    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">Instant Check-in</h3>
+                    <p style="color: #6b7280;">Students check in within seconds. No cards, no passwords.</p>
                 </div>
-                <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.5rem;">Real-time Updates</h3>
-                <p style="color: #6b7280; font-size: 0.875rem;">Live dashboard updates as students check in</p>
-            </div>
-            <div class="card">
-                <div class="stat-icon yellow" style="margin-bottom: 1rem;">
-                    <i data-lucide="bar-chart-3" style="width: 24px; height: 24px;"></i>
+                
+                <div class="card" style="text-align: center;">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">📊</div>
+                    <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">Real-time Reports</h3>
+                    <p style="color: #6b7280;">Track attendance instantly with automated reports and analytics.</p>
                 </div>
-                <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.5rem;">Detailed Reports</h3>
-                <p style="color: #6b7280; font-size: 0.875rem;">Daily, roster, and monthly attendance analytics</p>
-            </div>
-            <div class="card">
-                <div class="stat-icon red" style="margin-bottom: 1rem;">
-                    <i data-lucide="shield-check" style="width: 24px; height: 24px;"></i>
-                </div>
-                <h3 style="font-size: 1.125rem; font-weight: 600; margin-bottom: 0.5rem;">Privacy First</h3>
-                <p style="color: #6b7280; font-size: 0.875rem;">Encrypted data with consent management</p>
             </div>
         </div>
     </main>
 
-    <!-- Toast Container -->
-    <div id="toastContainer" class="toast-container"></div>
-
-    <!-- Scripts -->
     <script src="js/api.js"></script>
-    <script>
-        lucide.createIcons();
-    </script>
+    <script src="js/app.js"></script>
 </body>
 </html>
