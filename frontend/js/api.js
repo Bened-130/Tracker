@@ -1,15 +1,12 @@
 /**
  * API Service - Netlify Functions Version
- * 
- * All API calls go to /.netlify/functions/api/* which are
- * automatically routed to the appropriate serverless function.
  */
 
-const API_BASE = '';  // Relative path for Netlify
+const API_BASE = '/.netlify/functions/api';
 
 // Helper for API calls
 async function apiCall(endpoint, options = {}) {
-  const url = `${API_BASE}/.netlify/functions/api${endpoint}`;
+  const url = `${API_BASE}${endpoint}`;
   
   const config = {
     headers: {
