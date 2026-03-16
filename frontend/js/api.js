@@ -1,10 +1,10 @@
 /**
- * API Service - Netlify Functions Version
+ * API Service - Netlify Functions Version with Error Handling
  */
 
 const API_BASE = '/.netlify/functions/api';
 
-// Helper for API calls
+// Helper for API calls with detailed error handling
 async function apiCall(endpoint, options = {}) {
   const url = `${API_BASE}${endpoint}`;
   
@@ -23,11 +23,15 @@ async function apiCall(endpoint, options = {}) {
   }
 
   try {
+    console.log('API Call:', { url, method: options.method || 'GET' });
+    
     const response = await fetch(url, config);
     const data = await response.json();
     
-    if (!response.ok) {
-      throw new Error(data.error || `HTTP ${response.status}`);
+    console.log('API Response:', { status: response.status, success: data.success });
+    
+    if (!response.ok || !data.success) {
+      throw new Error(data.error || data.message || `HTTP ${response.status}`);
     }
     
     return data;
@@ -83,20 +87,29 @@ const api = {
 
 // Toast notification helper
 function showToast(message, type = 'info') {
+  // Remove existing toasts
+  const existing = document.querySelectorAll('.toast');
+  existing.forEach(t => t.remove());
+  
   const toast = document.createElement('div');
+  toast.className = `toast toast-${type}`;
   toast.style.cssText = `
     position: fixed;
     bottom: 2rem;
     right: 2rem;
     padding: 1rem 1.5rem;
-    border-radius: 0.5rem;
+    border-radius: 0.75rem;
     color: white;
-    font-weight: 500;
-    z-index: 1000;
+    font-weight: 600;
+    z-index: 10000;
     animation: slideIn 0.3s ease;
-    ${type === 'success' ? 'background: #10b981;' : 
-      type === 'error' ? 'background: #ef4444;' : 
-      type === 'warning' ? 'background: #f59e0b;' : 'background: #4f46e5;'}
+    max-width: 400px;
+    word-wrap: break-word;
+    ${type === 'success' ? 'background: linear-gradient(135deg, #10b981, #059669);' : 
+      type === 'error' ? 'background: linear-gradient(135deg, #ef4444, #dc2626);' : 
+      type === 'warning' ? 'background: linear-gradient(135deg, #f59e0b, #d97706);' : 
+      'background: linear-gradient(135deg, #6366f1, #4f46e5);'}
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
   `;
   toast.textContent = message;
   document.body.appendChild(toast);
@@ -104,5 +117,5 @@ function showToast(message, type = 'info') {
   setTimeout(() => {
     toast.style.animation = 'slideOut 0.3s ease';
     setTimeout(() => toast.remove(), 300);
-  }, 3000);
+  }, 5000);
 }
