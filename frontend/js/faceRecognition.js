@@ -1,7 +1,5 @@
 /**
  * Face Recognition Service
- * 
- * Wrapper for face-api.js to handle face detection and descriptor extraction.
  */
 
 const faceService = {
