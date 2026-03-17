@@ -1,10 +1,22 @@
 import { supabase } from './utils/supabase.mjs';
-import { verifyToken } from './utils/auth.mjs';
-import { averageDescriptors } from './utils/math.mjs';
+
+function averageDescriptors(descriptors) {
+  if (!descriptors || descriptors.length === 0) return null;
+  const length = descriptors[0].length;
+  const avg = new Array(length).fill(0);
+  
+  for (const desc of descriptors) {
+    for (let i = 0; i < length; i++) {
+      avg[i] += desc[i];
+    }
+  }
+  
+  return avg.map(val => val / descriptors.length);
+}
 
 export async function studentsHandler(event, context) {
   const method = event.httpMethod;
-  const path = event.path;
+  const path = event.path || '';
   const segments = path.split('/').filter(Boolean);
   const id = segments[2];
 
@@ -20,7 +32,7 @@ export async function studentsHandler(event, context) {
       
       return {
         statusCode: 200,
-        body: JSON.stringify({ success: true, data, count })
+        body: JSON.stringify({ success: true, data: data || [], count: count || 0 })
       };
     }
 
@@ -45,7 +57,6 @@ export async function studentsHandler(event, context) {
       const body = JSON.parse(event.body);
       const { first_name, last_name, email, class_id, face_descriptors } = body;
 
-      // Validation
       if (!first_name || !last_name || !email || !face_descriptors?.length) {
         return {
           statusCode: 400,
@@ -97,7 +108,7 @@ export async function studentsHandler(event, context) {
     };
 
   } catch (error) {
-    console.error('Students handler error:', error);
+    console.error('Students error:', error);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: error.message })
