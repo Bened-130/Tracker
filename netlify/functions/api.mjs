@@ -12,7 +12,6 @@ const getHeaders = () => ({
 });
 
 export const handler = async (event, context) => {
-  // CRITICAL: Must return a response in ALL code paths
   context.callbackWaitsForEmptyEventLoop = false;
   
   const headers = getHeaders();
@@ -22,7 +21,7 @@ export const handler = async (event, context) => {
     return { 
       statusCode: 200, 
       headers, 
-      body: JSON.stringify({ status: 'ok' }) // Must have body
+      body: JSON.stringify({ status: 'ok' })
     };
   }
 
@@ -32,26 +31,22 @@ export const handler = async (event, context) => {
   const segments = path.split('/').filter(Boolean);
   const endpoint = segments[0] || 'health';
 
-  console.log('API Request:', { 
-    method: event.httpMethod, 
-    path: event.path,
-    endpoint,
-    segments
-  });
+  console.log('API Request:', { method: event.httpMethod, endpoint });
 
   try {
     let result;
 
     switch (endpoint) {
       case 'health':
-        const dbHealthy = await checkSupabaseConnection();
+        const dbCheck = await checkSupabaseConnection();
         result = {
           statusCode: 200,
           body: JSON.stringify({ 
             success: true,
             status: 'ok', 
             timestamp: new Date().toISOString(),
-            database: dbHealthy ? 'connected' : 'disconnected'
+            database: dbCheck.connected ? 'connected' : 'disconnected',
+            dbError: dbCheck.error || null
           })
         };
         break;
@@ -77,30 +72,26 @@ export const handler = async (event, context) => {
           statusCode: 404,
           body: JSON.stringify({ 
             success: false,
-            error: 'Endpoint not found',
-            requested: endpoint
+            error: 'Endpoint not found'
           })
         };
     }
 
-    // CRITICAL: Ensure we always return headers
     return { 
       statusCode: result.statusCode || 500, 
       headers, 
-      body: result.body || JSON.stringify({ error: 'Empty response' })
+      body: typeof result.body === 'string' ? result.body : JSON.stringify(result.body)
     };
 
   } catch (error) {
-    console.error('CRITICAL API Error:', error);
-    // CRITICAL: Must return valid response even on error
+    console.error('CRITICAL ERROR:', error);
     return {
       statusCode: 500,
       headers,
       body: JSON.stringify({ 
         success: false,
         error: 'Internal server error',
-        message: error.message,
-        stack: error.stack
+        message: error.message
       })
     };
   }
