@@ -3,23 +3,23 @@ import { verifyToken } from './utils/auth.mjs';
 
 export async function classesHandler(event, context) {
   const method = event.httpMethod;
-  const path = event.path;
+  const path = event.path || '';
   const segments = path.split('/').filter(Boolean);
   const id = segments[2];
 
-  console.log('Classes handler called:', { method, path, id });
+  console.log('Classes handler:', { method, path, id });
 
   try {
     // GET /api/classes - List all classes
     if (method === 'GET' && !id) {
-      console.log('Fetching all classes...');
+      console.log('Fetching classes from Supabase...');
       
       const { data, error, count } = await supabase
         .from('classes')
-        .select('*, sessions(*)', { count: 'exact' });
+        .select('*', { count: 'exact' });
 
       if (error) {
-        console.error('Supabase error fetching classes:', error);
+        console.error('Supabase error:', error);
         return {
           statusCode: 500,
           body: JSON.stringify({ 
@@ -30,8 +30,9 @@ export async function classesHandler(event, context) {
         };
       }
 
-      console.log('Classes fetched:', data?.length, 'Count:', count);
+      console.log('Classes fetched:', data?.length || 0);
 
+      // CRITICAL: Always return valid JSON body
       return {
         statusCode: 200,
         body: JSON.stringify({ 
@@ -42,23 +43,21 @@ export async function classesHandler(event, context) {
       };
     }
 
-    // GET /api/classes/:id - Get single class
+    // GET /api/classes/:id
     if (method === 'GET' && id) {
-      console.log('Fetching class:', id);
-      
       const { data, error } = await supabase
         .from('classes')
-        .select(`*, sessions(*), students:students(*)`)
+        .select('*, sessions(*)')
         .eq('class_id', id)
         .single();
 
       if (error) {
-        console.error('Supabase error fetching class:', error);
         return {
           statusCode: 404,
           body: JSON.stringify({ 
             success: false,
-            error: 'Class not found' 
+            error: 'Class not found',
+            details: error.message
           })
         };
       }
@@ -69,7 +68,7 @@ export async function classesHandler(event, context) {
       };
     }
 
-    // POST /api/classes - Create class (teacher only)
+    // POST /api/classes
     if (method === 'POST') {
       const user = verifyToken(event.headers.authorization);
       if (!user || user.role !== 'teacher') {
@@ -77,7 +76,7 @@ export async function classesHandler(event, context) {
           statusCode: 403,
           body: JSON.stringify({ 
             success: false,
-            error: 'Unauthorized - Teacher access required' 
+            error: 'Unauthorized' 
           })
         };
       }
@@ -90,7 +89,7 @@ export async function classesHandler(event, context) {
           statusCode: 400,
           body: JSON.stringify({ 
             success: false,
-            error: 'Invalid JSON body' 
+            error: 'Invalid JSON' 
           })
         };
       }
@@ -102,12 +101,11 @@ export async function classesHandler(event, context) {
         .single();
 
       if (error) {
-        console.error('Supabase error creating class:', error);
         return {
           statusCode: 500,
           body: JSON.stringify({ 
             success: false,
-            error: 'Failed to create class',
+            error: 'Insert failed',
             details: error.message
           })
         };
@@ -119,21 +117,24 @@ export async function classesHandler(event, context) {
       };
     }
 
+    // Default: method not allowed
     return {
       statusCode: 405,
       body: JSON.stringify({ 
         success: false,
-        error: 'Method not allowed' 
+        error: 'Method not allowed',
+        method: method
       })
     };
 
   } catch (error) {
-    console.error('Classes handler exception:', error);
+    console.error('Classes handler error:', error);
+    // CRITICAL: Always return valid response
     return {
       statusCode: 500,
       body: JSON.stringify({ 
         success: false,
-        error: 'Internal server error',
+        error: 'Internal error',
         message: error.message
       })
     };
