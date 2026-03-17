@@ -12,30 +12,29 @@ const getHeaders = () => ({
 });
 
 export const handler = async (event, context) => {
+  // CRITICAL: Must return a response in ALL code paths
   context.callbackWaitsForEmptyEventLoop = false;
   
   const headers = getHeaders();
 
   // Handle preflight
   if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 200, headers, body: '' };
+    return { 
+      statusCode: 200, 
+      headers, 
+      body: JSON.stringify({ status: 'ok' }) // Must have body
+    };
   }
 
-  // Parse path - handle both /api/xxx and /.netlify/functions/api/xxx
-  let path = event.path;
-  if (path.startsWith('/.netlify/functions/api')) {
-    path = path.replace('/.netlify/functions/api', '');
-  } else if (path.startsWith('/api')) {
-    path = path.replace('/api', '');
-  }
-  
+  // Parse path
+  let path = event.path || '';
+  path = path.replace('/.netlify/functions/api', '').replace('/api', '');
   const segments = path.split('/').filter(Boolean);
   const endpoint = segments[0] || 'health';
 
   console.log('API Request:', { 
     method: event.httpMethod, 
-    originalPath: event.path,
-    parsedPath: path,
+    path: event.path,
     endpoint,
     segments
   });
@@ -52,11 +51,7 @@ export const handler = async (event, context) => {
             success: true,
             status: 'ok', 
             timestamp: new Date().toISOString(),
-            database: dbHealthy ? 'connected' : 'disconnected',
-            env: {
-              supabaseUrlSet: !!process.env.SUPABASE_URL,
-              supabaseKeySet: !!process.env.SUPABASE_SERVICE_KEY
-            }
+            database: dbHealthy ? 'connected' : 'disconnected'
           })
         };
         break;
@@ -88,10 +83,16 @@ export const handler = async (event, context) => {
         };
     }
 
-    return { ...result, headers };
+    // CRITICAL: Ensure we always return headers
+    return { 
+      statusCode: result.statusCode || 500, 
+      headers, 
+      body: result.body || JSON.stringify({ error: 'Empty response' })
+    };
 
   } catch (error) {
-    console.error('API Error:', error);
+    console.error('CRITICAL API Error:', error);
+    // CRITICAL: Must return valid response even on error
     return {
       statusCode: 500,
       headers,
@@ -99,7 +100,7 @@ export const handler = async (event, context) => {
         success: false,
         error: 'Internal server error',
         message: error.message,
-        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        stack: error.stack
       })
     };
   }
