@@ -2,7 +2,7 @@ import { supabase } from './utils/supabase.mjs';
 
 export async function reportsHandler(event, context) {
   const method = event.httpMethod;
-  const path = event.path;
+  const path = event.path || '';
   const segments = path.split('/').filter(Boolean);
 
   try {
@@ -10,38 +10,27 @@ export async function reportsHandler(event, context) {
     if (method === 'GET' && segments[1] === 'daily') {
       const sessionId = segments[2];
       
-      const { data, error } = await supabase
-        .rpc('get_daily_attendance', { session_id: sessionId });
+      const { data: attendance, error } = await supabase
+        .from('attendance')
+        .select('status')
+        .eq('session_id', sessionId);
 
-      if (error) {
-        // Fallback if RPC not available
-        const { data: attendance, error: attError } = await supabase
-          .from('attendance')
-          .select('status')
-          .eq('session_id', sessionId);
+      if (error) throw error;
 
-        if (attError) throw attError;
-
-        const stats = {
-          present: attendance.filter(a => a.status === 'present').length,
-          late: attendance.filter(a => a.status === 'late').length,
-          absent: attendance.filter(a => a.status === 'absent').length,
-          total: attendance.length
-        };
-        stats.pct = Math.round((stats.present + stats.late) / stats.total * 100) || 0;
-
-        return {
-          statusCode: 200,
-          body: JSON.stringify({ 
-            success: true, 
-            data: [{ ...stats, class_name: 'Unknown' }] 
-          })
-        };
-      }
+      const stats = {
+        present: attendance.filter(a => a.status === 'present').length,
+        late: attendance.filter(a => a.status === 'late').length,
+        absent: attendance.filter(a => a.status === 'absent').length,
+        total: attendance.length
+      };
+      stats.pct = stats.total > 0 ? Math.round((stats.present + stats.late) / stats.total * 100) : 0;
 
       return {
         statusCode: 200,
-        body: JSON.stringify({ success: true, data })
+        body: JSON.stringify({ 
+          success: true, 
+          data: [{ ...stats, class_name: 'Class Report' }] 
+        })
       };
     }
 
@@ -79,7 +68,6 @@ export async function reportsHandler(event, context) {
       const classId = segments[2];
       const { start_date, end_date } = event.queryStringParameters || {};
 
-      // Get all sessions in date range
       const { data: sessions, error } = await supabase
         .from('sessions')
         .select('session_id, session_date')
@@ -89,14 +77,12 @@ export async function reportsHandler(event, context) {
 
       if (error) throw error;
 
-      // Get attendance for all sessions
       const sessionIds = sessions.map(s => s.session_id);
       const { data: attendance } = await supabase
         .from('attendance')
         .select('session_id, status')
         .in('session_id', sessionIds);
 
-      // Calculate stats
       const totalRecords = attendance.length;
       const present = attendance.filter(a => a.status === 'present').length;
       const late = attendance.filter(a => a.status === 'late').length;
@@ -129,7 +115,7 @@ export async function reportsHandler(event, context) {
     };
 
   } catch (error) {
-    console.error('Reports handler error:', error);
+    console.error('Reports error:', error);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: error.message })
