@@ -1,12 +1,20 @@
 import { supabase } from './utils/supabase.mjs';
-import { verifyToken } from './utils/auth.mjs';
-import { euclideanDistance } from './utils/math.mjs';
 
 const THRESHOLD = 0.6;
 
+function euclideanDistance(desc1, desc2) {
+  if (!desc1 || !desc2 || desc1.length !== desc2.length) return Infinity;
+  let sum = 0;
+  for (let i = 0; i < desc1.length; i++) {
+    const diff = desc1[i] - desc2[i];
+    sum += diff * diff;
+  }
+  return Math.sqrt(sum);
+}
+
 export async function attendanceHandler(event, context) {
   const method = event.httpMethod;
-  const path = event.path;
+  const path = event.path || '';
   
   try {
     const body = event.body ? JSON.parse(event.body) : {};
@@ -123,39 +131,13 @@ export async function attendanceHandler(event, context) {
       };
     }
 
-    // POST /api/attendance/manual
-    if (method === 'POST' && path.includes('/manual')) {
-      const user = verifyToken(event.headers.authorization);
-      if (!user || user.role !== 'teacher') {
-        return {
-          statusCode: 403,
-          body: JSON.stringify({ error: 'Unauthorized' })
-        };
-      }
-
-      const { student_id, session_id, status } = body;
-
-      const { data, error } = await supabase
-        .from('attendance')
-        .insert([{ student_id, session_id, status }])
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      return {
-        statusCode: 201,
-        body: JSON.stringify({ success: true, data })
-      };
-    }
-
     return {
       statusCode: 405,
       body: JSON.stringify({ error: 'Method not allowed' })
     };
 
   } catch (error) {
-    console.error('Attendance handler error:', error);
+    console.error('Attendance error:', error);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: error.message })
