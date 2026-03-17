@@ -1,10 +1,5 @@
-/**
- * API Service - Netlify Functions Version with Error Handling
- */
-
 const API_BASE = '/.netlify/functions/api';
 
-// Helper for API calls with detailed error handling
 async function apiCall(endpoint, options = {}) {
   const url = `${API_BASE}${endpoint}`;
   
@@ -16,19 +11,12 @@ async function apiCall(endpoint, options = {}) {
     ...options
   };
 
-  // Add auth token if available
-  const token = localStorage.getItem('token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-
   try {
-    console.log('API Call:', { url, method: options.method || 'GET' });
-    
+    console.log('API Call:', url);
     const response = await fetch(url, config);
     const data = await response.json();
     
-    console.log('API Response:', { status: response.status, success: data.success });
+    console.log('API Response:', data);
     
     if (!response.ok || !data.success) {
       throw new Error(data.error || data.message || `HTTP ${response.status}`);
@@ -41,42 +29,21 @@ async function apiCall(endpoint, options = {}) {
   }
 }
 
-// API Methods
 const api = {
-  // Health check
   health: () => apiCall('/health'),
-
-  // Students
   getStudents: () => apiCall('/students'),
   getStudent: (id) => apiCall(`/students/${id}`),
   registerStudent: (data) => apiCall('/students', {
     method: 'POST',
     body: JSON.stringify(data)
   }),
-
-  // Attendance
   markAttendance: (sessionId, faceDescriptor) => apiCall('/attendance/mark', {
     method: 'POST',
-    body: JSON.stringify({
-      session_id: sessionId,
-      face_descriptor: faceDescriptor
-    })
+    body: JSON.stringify({ session_id: sessionId, face_descriptor: faceDescriptor })
   }),
   getSessionAttendance: (sessionId) => apiCall(`/attendance/session/${sessionId}`),
-  markManualAttendance: (data) => apiCall('/attendance/manual', {
-    method: 'POST',
-    body: JSON.stringify(data)
-  }),
-
-  // Classes
   getClasses: () => apiCall('/classes'),
   getClass: (id) => apiCall(`/classes/${id}`),
-  createClass: (data) => apiCall('/classes', {
-    method: 'POST',
-    body: JSON.stringify(data)
-  }),
-
-  // Reports
   getDailyReport: (sessionId) => apiCall(`/reports/daily/${sessionId}`),
   getRosterReport: (sessionId) => apiCall(`/reports/roster/${sessionId}`),
   getMonthlyReport: (classId, params = {}) => {
@@ -85,14 +52,11 @@ const api = {
   }
 };
 
-// Toast notification helper
 function showToast(message, type = 'info') {
-  // Remove existing toasts
   const existing = document.querySelectorAll('.toast');
   existing.forEach(t => t.remove());
   
   const toast = document.createElement('div');
-  toast.className = `toast toast-${type}`;
   toast.style.cssText = `
     position: fixed;
     bottom: 2rem;
@@ -104,10 +68,8 @@ function showToast(message, type = 'info') {
     z-index: 10000;
     animation: slideIn 0.3s ease;
     max-width: 400px;
-    word-wrap: break-word;
     ${type === 'success' ? 'background: linear-gradient(135deg, #10b981, #059669);' : 
       type === 'error' ? 'background: linear-gradient(135deg, #ef4444, #dc2626);' : 
-      type === 'warning' ? 'background: linear-gradient(135deg, #f59e0b, #d97706);' : 
       'background: linear-gradient(135deg, #6366f1, #4f46e5);'}
     box-shadow: 0 10px 25px rgba(0,0,0,0.2);
   `;
