@@ -2,7 +2,7 @@ import { createClient } from '@supabase/supabase-js';
 
 // YOUR SUPABASE CREDENTIALS (Hardcoded for immediate functionality)
 const SUPABASE_URL = 'https://zokmdocanxmlkpoovkrn.supabase.co';
-const SUPABASE_SERVICE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpva21kb2NhbnhtbGtwb292a3JuIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0MjE1MTYwMCwiZXhwIjoyMDU3NzI3NjAwfQ.SWD7mjl3jn-ifwD3XcygKQ_7XW0Xl_Z4kYqXqXqXqXq';
+const SUPABASE_SERVICE_KEY = 'sb_secret_SWD7mjl3jn-ifwD3XcygKQ_7XW0Xl_Z';
 
 // Debug logging
 console.log('Supabase Config:', {
