@@ -1,5 +1,4 @@
 import { supabase } from './utils/supabase.mjs';
-import { verifyToken } from './utils/auth.mjs';
 
 export async function classesHandler(event, context) {
   const method = event.httpMethod;
@@ -7,44 +6,49 @@ export async function classesHandler(event, context) {
   const segments = path.split('/').filter(Boolean);
   const id = segments[2];
 
-  console.log('Classes handler:', { method, path, id });
+  console.log('Classes handler:', { method, id });
 
   try {
     // GET /api/classes - List all classes
     if (method === 'GET' && !id) {
-      console.log('Fetching classes from Supabase...');
+      console.log('Fetching all classes...');
       
       const { data, error, count } = await supabase
         .from('classes')
         .select('*', { count: 'exact' });
 
+      console.log('Supabase response:', { 
+        dataLength: data?.length, 
+        hasError: !!error,
+        errorMsg: error?.message
+      });
+
       if (error) {
-        console.error('Supabase error:', error);
+        console.error('Database error:', error);
         return {
           statusCode: 500,
           body: JSON.stringify({ 
             success: false,
             error: 'Database error', 
-            details: error.message 
+            details: error.message
           })
         };
       }
 
-      console.log('Classes fetched:', data?.length || 0);
-
-      // CRITICAL: Always return valid JSON body
       return {
         statusCode: 200,
         body: JSON.stringify({ 
           success: true, 
           data: data || [],
-          count: count || 0
+          count: data?.length || 0
         })
       };
     }
 
     // GET /api/classes/:id
     if (method === 'GET' && id) {
+      console.log('Fetching class:', id);
+      
       const { data, error } = await supabase
         .from('classes')
         .select('*, sessions(*)')
@@ -56,8 +60,7 @@ export async function classesHandler(event, context) {
           statusCode: 404,
           body: JSON.stringify({ 
             success: false,
-            error: 'Class not found',
-            details: error.message
+            error: 'Class not found'
           })
         };
       }
@@ -70,17 +73,6 @@ export async function classesHandler(event, context) {
 
     // POST /api/classes
     if (method === 'POST') {
-      const user = verifyToken(event.headers.authorization);
-      if (!user || user.role !== 'teacher') {
-        return {
-          statusCode: 403,
-          body: JSON.stringify({ 
-            success: false,
-            error: 'Unauthorized' 
-          })
-        };
-      }
-
       let body;
       try {
         body = JSON.parse(event.body);
@@ -117,19 +109,16 @@ export async function classesHandler(event, context) {
       };
     }
 
-    // Default: method not allowed
     return {
       statusCode: 405,
       body: JSON.stringify({ 
         success: false,
-        error: 'Method not allowed',
-        method: method
+        error: 'Method not allowed'
       })
     };
 
   } catch (error) {
-    console.error('Classes handler error:', error);
-    // CRITICAL: Always return valid response
+    console.error('Handler error:', error);
     return {
       statusCode: 500,
       body: JSON.stringify({ 
