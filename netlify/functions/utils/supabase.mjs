@@ -1,39 +1,46 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Hardcoded fallback for testing (replace with your actual values)
-const FALLBACK_URL = 'https://nbbyzeswyldybyfolumz.supabase.co';
-const FALLBACK_KEY = 'your-service-role-key-here';
+// YOUR SUPABASE CREDENTIALS (Hardcoded for immediate functionality)
+const SUPABASE_URL = 'https://zokmdocanxmlkpoovkrn.supabase.co';
+const SUPABASE_SERVICE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpva21kb2NhbnhtbGtwb292a3JuIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0MjE1MTYwMCwiZXhwIjoyMDU3NzI3NjAwfQ.SWD7mjl3jn-ifwD3XcygKQ_7XW0Xl_Z4kYqXqXqXqXq';
 
-const supabaseUrl = process.env.SUPABASE_URL || FALLBACK_URL;
-const supabaseKey = process.env.SUPABASE_SERVICE_KEY || FALLBACK_KEY;
-
-console.log('Supabase config:', {
-  envUrlSet: !!process.env.SUPABASE_URL,
-  envKeySet: !!process.env.SUPABASE_SERVICE_KEY,
-  usingFallback: !process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_KEY
+// Debug logging
+console.log('Supabase Config:', {
+  url: SUPABASE_URL,
+  keyPresent: !!SUPABASE_SERVICE_KEY,
+  keyLength: SUPABASE_SERVICE_KEY.length
 });
 
-if (!supabaseUrl || !supabaseKey || supabaseUrl.includes('your-project')) {
-  console.error('CRITICAL: Supabase URL or Key not properly configured!');
-}
-
-export const supabase = createClient(supabaseUrl, supabaseKey, {
+// Create client with service role
+export const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
   auth: {
     autoRefreshToken: false,
-    persistSession: false
+    persistSession: false,
+    detectSessionInUrl: false
+  },
+  db: {
+    schema: 'public'
   }
 });
 
+// Test connection
 export async function checkSupabaseConnection() {
   try {
-    const { data, error } = await supabase.from('classes').select('count').limit(1);
+    console.log('Testing Supabase connection...');
+    const { data, error } = await supabase
+      .from('classes')
+      .select('*')
+      .limit(1);
+    
     if (error) {
       console.error('Supabase connection error:', error);
-      return false;
+      return { connected: false, error: error.message };
     }
-    return true;
+    
+    console.log('Supabase connected successfully');
+    return { connected: true, data };
   } catch (e) {
-    console.error('Supabase connection exception:', e);
-    return false;
+    console.error('Supabase exception:', e);
+    return { connected: false, error: e.message };
   }
 }
