@@ -6,21 +6,23 @@ export async function classesHandler(event, context) {
   const segments = path.split('/').filter(Boolean);
   const id = segments[2];
 
-  console.log('Classes handler:', { method, id });
+  console.log('Classes handler called:', { method, path, id });
 
   try {
     // GET /api/classes - List all classes
     if (method === 'GET' && !id) {
-      console.log('Fetching all classes...');
+      console.log('Fetching all classes from Supabase...');
       
       const { data, error, count } = await supabase
         .from('classes')
         .select('*', { count: 'exact' });
 
       console.log('Supabase response:', { 
-        dataLength: data?.length, 
+        hasData: !!data,
+        dataLength: data?.length,
         hasError: !!error,
-        errorMsg: error?.message
+        errorMessage: error?.message,
+        count: count
       });
 
       if (error) {
@@ -29,25 +31,40 @@ export async function classesHandler(event, context) {
           statusCode: 500,
           body: JSON.stringify({ 
             success: false,
-            error: 'Database error', 
-            details: error.message
+            error: 'Database query failed', 
+            details: error.message,
+            code: error.code
           })
         };
       }
 
+      if (!data || data.length === 0) {
+        console.log('No classes found in database');
+        return {
+          statusCode: 200,
+          body: JSON.stringify({ 
+            success: true, 
+            data: [],
+            count: 0,
+            message: 'No classes found. Please run the SQL setup script.'
+          })
+        };
+      }
+
+      console.log('Successfully found', data.length, 'classes');
       return {
         statusCode: 200,
         body: JSON.stringify({ 
           success: true, 
-          data: data || [],
-          count: data?.length || 0
+          data: data,
+          count: data.length
         })
       };
     }
 
     // GET /api/classes/:id
     if (method === 'GET' && id) {
-      console.log('Fetching class:', id);
+      console.log('Fetching class by ID:', id);
       
       const { data, error } = await supabase
         .from('classes')
@@ -55,7 +72,8 @@ export async function classesHandler(event, context) {
         .eq('class_id', id)
         .single();
 
-      if (error) {
+      if (error || !data) {
+        console.log('Class not found:', id);
         return {
           statusCode: 404,
           body: JSON.stringify({ 
@@ -81,7 +99,7 @@ export async function classesHandler(event, context) {
           statusCode: 400,
           body: JSON.stringify({ 
             success: false,
-            error: 'Invalid JSON' 
+            error: 'Invalid JSON body' 
           })
         };
       }
@@ -97,7 +115,7 @@ export async function classesHandler(event, context) {
           statusCode: 500,
           body: JSON.stringify({ 
             success: false,
-            error: 'Insert failed',
+            error: 'Failed to create class',
             details: error.message
           })
         };
