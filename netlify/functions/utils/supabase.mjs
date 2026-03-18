@@ -1,17 +1,14 @@
 import { createClient } from '@supabase/supabase-js';
 
-// YOUR SUPABASE CREDENTIALS (Hardcoded for immediate functionality)
+// YOUR CREDENTIALS - Replace with your actual legacy JWT service_role key
 const SUPABASE_URL = 'https://zokmdocanxmlkpoovkrn.supabase.co';
-const SUPABASE_SERVICE_KEY = 'sb_secret_SWD7mjl3jn-ifwD3XcygKQ_7XW0Xl_Z';
+const SUPABASE_SERVICE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inpva21kb2NhbnhtbGtwb292a3JuIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MzI0MzUwNSwiZXhwIjoyMDg4ODE5NTA1fQ.n81cXMboxC4RZsgkKk8Np0kE-nHfKZftMu1YMDe7buQ';
 
-// Debug logging
-console.log('Supabase Config:', {
-  url: SUPABASE_URL,
-  keyPresent: !!SUPABASE_SERVICE_KEY,
-  keyLength: SUPABASE_SERVICE_KEY.length
-});
+// Validate
+if (!SUPABASE_SERVICE_KEY) {
+  console.error('CRITICAL: SUPABASE_SERVICE_KEY environment variable is not set!');
+}
 
-// Create client with service role
 export const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
   auth: {
     autoRefreshToken: false,
@@ -23,24 +20,18 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
   }
 });
 
-// Test connection
 export async function checkSupabaseConnection() {
   try {
-    console.log('Testing Supabase connection...');
-    const { data, error } = await supabase
-      .from('classes')
-      .select('*')
-      .limit(1);
+    const { data, error } = await supabase.from('classes').select('count').limit(1);
     
     if (error) {
-      console.error('Supabase connection error:', error);
+      console.error('DB Error:', error);
       return { connected: false, error: error.message };
     }
     
-    console.log('Supabase connected successfully');
-    return { connected: true, data };
+    return { connected: true };
   } catch (e) {
-    console.error('Supabase exception:', e);
+    console.error('Exception:', e);
     return { connected: false, error: e.message };
   }
 }
