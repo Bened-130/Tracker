@@ -1,6 +1,6 @@
 # SchoolVibe AI Tracker - Setup & Installation Guide
 
-## 🎯 Quick Start (5 minutes)
+## QUICK START (5 MINUTES)
 
 ### Option A: Web Only
 ```bash
@@ -55,7 +55,7 @@ netlify deploy --prod
 
 ---
 
-## 📱 Mobile App Setup
+## MOBILE APP SETUP
 
 ### Prerequisites
 ```bash
