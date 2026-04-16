@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - BENEDICT ACADEMY Attendance Tracker</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="css/styles.css">
+    <style>
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .login-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 24px;
+            padding: 3rem;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .login-logo {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 1.5rem;
+            margin: 0 auto 1rem;
+        }
+
+        .login-header h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 0.5rem;
+        }
+
+        .login-header p {
+            color: #6b7280;
+            font-size: 0.95rem;
+        }
+
+        .role-section {
+            margin-bottom: 2rem;
+        }
+
+        .role-section label {
+            display: block;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 1rem;
+            font-size: 0.95rem;
+        }
+
+        .role-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .role-btn {
+            padding: 1.25rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-weight: 600;
+            color: #6b7280;
+        }
+
+        .role-btn:hover {
+            border-color: #6366f1;
+            background: #f3f4f6;
+        }
+
+        .role-btn.active {
+            border-color: #6366f1;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(120, 119, 198, 0.1) 100%);
+            color: #6366f1;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 1.5px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #6366f1;
+            background: rgba(99, 102, 241, 0.05);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .login-btn:disabled {
+            background: #d1d5db;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .demo-accounts {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .demo-accounts h3 {
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .demo-account {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #e5e7eb;
+            font-size: 0.875rem;
+        }
+
+        .demo-account:last-child {
+            border-bottom: none;
+        }
+
+        .demo-account strong {
+            color: #111827;
+        }
+
+        .demo-account .account-text {
+            color: #6b7280;
+        }
+
+        .error-msg {
+            color: #ef4444;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
+
+        .success-msg {
+            color: #10b981;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
+
+        @media (max-width: 640px) {
+            .login-card {
+                padding: 2rem;
+            }
+
+            .login-header h1 {
+                font-size: 1.5rem;
+            }
+
+            .role-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <div class="login-logo">BA</div>
+                <h1>BENEDICT ACADEMY</h1>
+                <p>Smart Attendance Tracker</p>
+            </div>
+
+            <form id="loginForm">
+                <!-- Role Selection -->
+                <div class="role-section">
+                    <label>Select Your Role *</label>
+                    <div class="role-grid">
+                        <button type="button" class="role-btn" data-role="student">
+                            STUDENT
+                        </button>
+                        <button type="button" class="role-btn" data-role="teacher">
+                            TEACHER
+                        </button>
+                        <button type="button" class="role-btn" data-role="parent">
+                            PARENT
+                        </button>
+                        <button type="button" class="role-btn" data-role="admin">
+                            ADMIN
+                        </button>
+                    </div>
+                    <span class="error-msg" id="roleError">Please select a role</span>
+                </div>
+
+                <!-- Email -->
+                <div class="form-group">
+                    <label for="email">Email Address *</label>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        name="email" 
+                        placeholder="Enter your email"
+                        required
+                    >
+                    <span class="error-msg" id="emailError"></span>
+                </div>
+
+                <!-- Password -->
+                <div class="form-group">
+                    <label for="password">Password *</label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        placeholder="Enter your password"
+                        required
+                    >
+                    <span class="error-msg" id="passwordError"></span>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="login-btn" id="loginBtn">Login</button>
+                <span class="error-msg" id="loginError"></span>
+                <span class="success-msg" id="loginSuccess"></span>
+            </form>
+
+            <!-- Demo Accounts Info -->
+            <div class="demo-accounts">
+                <h3>Demo Accounts</h3>
+                <div class="demo-account">
+                    <strong>Admin:</strong> <span class="account-text">admin@school.com / admin123</span>
+                </div>
+                <div class="demo-account">
+                    <strong>Teacher:</strong> <span class="account-text">teacher@school.com / teacher123</span>
+                </div>
+                <div class="demo-account">
+                    <strong>Student:</strong> <span class="account-text">student@school.com / student123</span>
+                </div>
+                <div class="demo-account">
+                    <strong>Parent:</strong> <span class="account-text">parent@school.com / parent123</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/login.js"></script>
+</body>
+</html>
