@@ -87,7 +87,7 @@ app.listen(PORT, () => {
     console.log(`
     ╔════════════════════════════════════════════════╗
     ║                                                ║
-    ║     🎓 SchoolVibe AI Tracker Backend           ║
+    ║     BENEDICT ACADEMY Tracker Backend           ║
     ║                                                ║
     ║     Server running on port ${PORT}                ║
     ║     Environment: ${process.env.NODE_ENV || 'development'}        ║
