@@ -64,19 +64,19 @@
             <!-- Features Grid -->
             <div class="grid-3" style="text-align: left;">
                 <div class="card" style="text-align: center;">
-                    <div style="font-size: 3rem; margin-bottom: 1rem;">🎯</div>
+                    <div style="font-size: 3rem; margin-bottom: 1rem; font-weight: 700; color: #4f46e5;">✓</div>
                     <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">99% Accuracy</h3>
                     <p style="color: #6b7280;">State-of-the-art face recognition with 128-point facial mapping.</p>
                 </div>
                 
                 <div class="card" style="text-align: center;">
-                    <div style="font-size: 3rem; margin-bottom: 1rem;">⚡</div>
+                    <div style="font-size: 3rem; margin-bottom: 1rem; font-weight: 700; color: #4f46e5;">→</div>
                     <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">Instant Check-in</h3>
                     <p style="color: #6b7280;">Students check in within seconds. No cards, no passwords.</p>
                 </div>
                 
                 <div class="card" style="text-align: center;">
-                    <div style="font-size: 3rem; margin-bottom: 1rem;">📊</div>
+                    <div style="font-size: 3rem; margin-bottom: 1rem; font-weight: 700; color: #4f46e5;">▬</div>
                     <h3 style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">Real-time Reports</h3>
                     <p style="color: #6b7280;">Track attendance instantly with automated reports and analytics.</p>
                 </div>
@@ -85,6 +85,11 @@
     </main>
 
     <script src="js/api.js"></script>
+    <script src="js/login.js"></script>
     <script src="js/app.js"></script>
+    <script>
+        // Require authentication on this page
+        requireAuth();
+    </script>
 </body>
 </html>
