@@ -1,8 +1,8 @@
 # SchoolVibe AI Tracker - Complete Project Documentation
 
-**Status**: ✅ Full stack implementation with web + mobile apps
+**Status**: Full stack implementation with web + mobile apps
 
-## 🎯 Project Overview
+## Project Overview
 
 SchoolVibe AI Tracker is a comprehensive school management platform with:
 - **Facial recognition** for student check-in
@@ -15,7 +15,7 @@ SchoolVibe AI Tracker is a comprehensive school management platform with:
 
 ---
 
-## 📦 Project Structure
+## Project Structure
 
 ```
 Tracker/
@@ -69,7 +69,7 @@ Tracker/
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 - Node.js 16+
@@ -121,7 +121,7 @@ npm start
 
 ---
 
-## 📊 Database Schema
+## Database Schema
 
 ### Core Tables
 ```sql
@@ -275,28 +275,28 @@ POST /parent/messages
 
 ---
 
-## 👥 Role-Based Features
+## Role-Based Features
 
-### 👨‍💼 Admin
+###  Admin
 - **Financial Dashboard**: Real-time payment tracking
 - **Payment Notifications**: Supabase subscribe to fees table
 - **Student Management**: Register students with face enrollment
 - **Financial Statements**: SUM(fees due/paid) SQL functions
 - **No Parent Communication**: Finance-focused only
 
-### 👨‍🎓 Student
+###  Student
 - **Mandatory Face Verification**: Login + check-in
 - **Personal Dashboard**: Results, assignments, timetable
 - **Financial Summary**: Fees paid vs. due
 - **Identical to Parent View**: See same data parent sees
 
-### 👨‍👩‍👦 Parent
+###  Parent
 - **Child's Data**: Results, assignments, timetable, fees
 - **Real-Time Comments**: Supabase subscriptions with teachers
 - **Communication**: Send/receive messages from teachers
 - **Mirrors Student View**: Same dashboard layout
 
-### 👨‍🏫 Teacher
+### Teacher
 - **Assignment CRUD**: Create, read, update delete
 - **Session Management**: Open/close check-in sessions
 - **Attendance Reports**: Generate CSV by date range
@@ -305,7 +305,7 @@ POST /parent/messages
 
 ---
 
-## 🎨 UI Component Library
+## UI Component Library
 
 ### Glassmorphism Components (SharedUI)
 
@@ -339,7 +339,7 @@ POST /parent/messages
 
 ---
 
-## 📱 Facial Recognition Flow
+## Facial Recognition Flow
 
 ### Enrollment (Registration)
 1. Student signs up
@@ -378,7 +378,7 @@ const handleFacesDetected = async ({ faces }) => {
 
 ---
 
-## 💳 Payment Integration (Stripe)
+## Payment Integration (Stripe)
 
 ### Flow
 1. **Admin Dashboard** shows "Payment Due" for each student
@@ -412,7 +412,7 @@ useEffect(() => {
 
 ---
 
-## 🔐 Security
+## Security
 
 ### Row-Level Security (RLS)
 All tables have RLS policies enabled:
@@ -433,7 +433,7 @@ All tables have RLS policies enabled:
 
 ---
 
-## 📈 Real-time Features
+## Real-time Features
 
 ### Implemented via Supabase subscriptions:
 
@@ -463,7 +463,7 @@ CREATE PUBLICATION "notifications" FOR TABLE notifications;
 
 ---
 
-## 🧪 Testing Data
+##  Testing Data
 
 Run `/supabase/03_seed_data.sql` to populate:
 - 50 sample students
@@ -477,7 +477,7 @@ Run `/supabase/03_seed_data.sql` to populate:
 
 ---
 
-## 📦 Deployment
+## Deployment
 
 ### Frontend (Netlify)
 ```bash
@@ -499,7 +499,7 @@ eas build --platform all --profile production
 
 ---
 
-## 🐛 Common Issues & Solutions
+## Common Issues & Solutions
 
 | Issue | Solution |
 |-------|----------|
@@ -512,7 +512,7 @@ eas build --platform all --profile production
 
 ---
 
-## 📚 Additional Resources
+## Additional Resources
 
 - [Supabase Docs](https://supabase.com/docs)
 - [React Native Vision Camera](https://react-native-vision-camera.com/)
@@ -522,7 +522,7 @@ eas build --platform all --profile production
 
 ---
 
-## 👥 Authors & Contributors
+## Authors & Contributors
 
 - **Lead Developer**: [Your Name]
 - **Mobile**: React Native + Expo
@@ -532,7 +532,7 @@ eas build --platform all --profile production
 
 ---
 
-## 📄 License
+## License
 
 MIT
 
@@ -540,4 +540,4 @@ MIT
 
 **Last Updated**: April 2026  
 **Version**: 1.0.0  
-**Status**: Production Ready ✅
+**Status**: Production Ready 
