@@ -172,7 +172,7 @@ if (ENV.NODE_ENV !== 'production') {
   app.listen(ENV.PORT, () => {
     console.log(`
     ╔══════════════════════════════════════════════════════════╗
-    ║  🎓 BENEDICT ACADEMY Tracker Backend                        ║
+    ║  BENEDICT ACADEMY Tracker Backend                        ║
     ║                                                          ║
     ║  Environment: ${ENV.NODE_ENV.padEnd(20)}                   ║
     ║  Local:       http://localhost:${ENV.PORT}/api             ║
