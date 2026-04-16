@@ -327,5 +327,10 @@
             showToast('Report exported successfully', 'success');
         }
     </script>
+    <script src="js/login.js"></script>
+    <script>
+        // Require authentication on this page (teachers, admin can view reports)
+        requireRole('admin', 'teacher');
+    </script>
 </body>
 </html>
