@@ -15,10 +15,6 @@
       }
     },
     "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      },
       "permissions": [
         "android.permission.CAMERA",
         "android.permission.READ_EXTERNAL_STORAGE",
@@ -26,10 +22,10 @@
       ]
     },
     "web": {
-      "favicon": "./assets/favicon.png"
+      "favicon": null
     },
     "splash": {
-      "image": "./assets/splash.png",
+      "image": null,
       "resizeMode": "contain",
       "backgroundColor": "#1a1a1a"
     },
