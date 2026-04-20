@@ -190,33 +190,33 @@
 
         <!-- Assignments Tab -->
         <div id="assignments-tab" class="tab-content">
-            <button class="btn" id="newAssignmentBtn" style="margin-bottom: 2rem;">+ New Assignment</button>
+            <button class="btn new-assignment-btn" id="newAssignmentBtn">+ New Assignment</button>
             <div id="assignmentsContainer">
                 <!-- Populated by JS -->
             </div>
         </div>
 
         <!-- Attendance Tab -->
-        <div id="attendance-tab" class="tab-content" style="display: none;">
+        <div id="attendance-tab" class="tab-content tab-content-hidden">
             <div class="card">
-                <h3 style="margin-bottom: 1rem;">Select Session</h3>
-                <select id="sessionSelect" style="margin-bottom: 1rem;">
+                <h3 class="tab-content-title">Select Session</h3>
+                <select id="sessionSelect" class="select-with-margin" title="Select session">
                     <option>Loading sessions...</option>
                 </select>
                 <button class="btn">Generate Report</button>
             </div>
-            <div id="attendanceContainer" style="margin-top: 2rem;">
+            <div id="attendanceContainer" class="attendance-container">
                 <!-- Report populated by JS -->
             </div>
         </div>
 
         <!-- Grades Tab -->
-        <div id="grades-tab" class="tab-content" style="display: none;">
+        <div id="grades-tab" class="tab-content tab-content-hidden">
             <div class="card">
-                <h3 style="margin-bottom: 1rem;">Add Student Grade</h3>
+                <h3 class="tab-content-title">Add Student Grade</h3>
                 <div class="form-group">
                     <label>Student</label>
-                    <select id="studentSelect">
+                    <select id="studentSelect" title="Select student">
                         <option>Loading students...</option>
                     </select>
                 </div>
@@ -234,24 +234,24 @@
     </div>
 
     <!-- Assignment Modal -->
-    <div id="assignmentModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 1000; display: flex; justify-content: center; align-items: center;">
-        <div class="card" style="width: 90%; max-width: 500px;">
-            <h2 style="margin-bottom: 1.5rem;">Create Assignment</h2>
+    <div id="assignmentModal" class="assignment-modal">
+        <div class="card modal-card">
+            <h2 class="modal-title">Create Assignment</h2>
             <div class="form-group">
                 <label>Title</label>
                 <input type="text" id="assignmentTitle" placeholder="Assignment title">
             </div>
             <div class="form-group">
                 <label>Due Date</label>
-                <input type="date" id="assignmentDueDate">
+                <input type="date" id="assignmentDueDate" title="Select assignment due date">
             </div>
             <div class="form-group">
                 <label>Description</label>
                 <textarea id="assignmentDescription" rows="4" placeholder="Assignment description"></textarea>
             </div>
-            <div style="display: flex; gap: 1rem;">
-                <button class="btn" id="saveAssignmentBtn" style="flex: 1;">Save</button>
-                <button class="btn" id="closeModalBtn" style="flex: 1; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);">Cancel</button>
+            <div class="modal-buttons">
+                <button class="btn modal-btn-save" id="saveAssignmentBtn">Save</button>
+                <button class="btn modal-btn-cancel" id="closeModalBtn">Cancel</button>
             </div>
         </div>
     </div>
