@@ -45,27 +45,27 @@
         </div>
 
         <!-- Stats Cards -->
-        <div class="grid-4" style="margin-bottom: 2rem;">
+        <div class="grid-4 card-margin-bottom">
             <div class="stat-card">
-                <div class="stat-icon" style="background: #dbeafe; color: #1e40af;">👥</div>
+                <div class="stat-icon stat-icon-inline">👥</div>
                 <div class="stat-value" id="totalStudents">-</div>
                 <div class="stat-label">Total Students</div>
             </div>
             
             <div class="stat-card">
-                <div class="stat-icon" style="background: #d1fae5; color: #065f46;">✓</div>
+                <div class="stat-icon stat-icon-inline green">✓</div>
                 <div class="stat-value" id="presentToday">-</div>
                 <div class="stat-label">Present Today</div>
             </div>
             
             <div class="stat-card">
-                <div class="stat-icon" style="background: #fef3c7; color: #92400e;">⏰</div>
+                <div class="stat-icon stat-icon-inline yellow">⏰</div>
                 <div class="stat-value" id="lateToday">-</div>
                 <div class="stat-label">Late Today</div>
             </div>
             
             <div class="stat-card">
-                <div class="stat-icon" style="background: #fee2e2; color: #991b1b;">✕</div>
+                <div class="stat-icon stat-icon-inline red">✕</div>
                 <div class="stat-value" id="absentToday">-</div>
                 <div class="stat-label">Absent Today</div>
             </div>
@@ -75,7 +75,7 @@
         <div class="card">
             <div class="card-header">
                 <h2 class="card-title">Recent Check-ins</h2>
-                <a href="checkin.html" class="btn btn-primary" style="padding: 0.5rem 1rem;">New Check-in</a>
+                <a href="checkin.html" class="btn btn-primary btn-small-padding">New Check-in</a>
             </div>
             
             <div class="table-container">
@@ -90,7 +90,7 @@
                     </thead>
                     <tbody id="recentActivity">
                         <tr>
-                            <td colspan="4" style="text-align: center; padding: 2rem; color: #6b7280;">
+                            <td colspan="4" class="table-empty-cell">
                                 Loading...
                             </td>
                         </tr>
