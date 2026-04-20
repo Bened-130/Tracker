@@ -44,11 +44,11 @@
             <p class="page-description">View and export attendance data</p>
         </div>
 
-        <div class="card" style="margin-bottom: 1.5rem;">
+        <div class="card card-margin-bottom">
             <div class="grid-3">
                 <div class="form-group">
                     <label class="form-label">Report Type</label>
-                    <select id="reportType" class="form-select" onchange="updateReportOptions()">
+                    <select id="reportType" class="form-select" title="Select report type" onchange="updateReportOptions()">
                         <option value="daily">Daily Summary</option>
                         <option value="roster">Class Roster</option>
                         <option value="monthly">Monthly Report</option>
@@ -57,28 +57,28 @@
                 
                 <div class="form-group">
                     <label class="form-label">Class</label>
-                    <select id="classSelect" class="form-select class-select" onchange="loadClassSessions()">
+                    <select id="classSelect" class="form-select class-select" title="Select class" onchange="loadClassSessions()">
                         <option value="">Select a class</option>
                     </select>
                 </div>
                 
                 <div class="form-group" id="sessionGroup">
                     <label class="form-label">Session</label>
-                    <select id="sessionSelect" class="form-select">
+                    <select id="sessionSelect" class="form-select" title="Select session">
                         <option value="">Select a session</option>
                     </select>
                 </div>
                 
-                <div class="form-group hidden" id="dateRangeGroup" style="display: none;">
+                <div class="form-group hidden" id="dateRangeGroup">
                     <label class="form-label">Date Range</label>
-                    <div style="display: flex; gap: 0.5rem;">
-                        <input type="date" id="startDate" class="form-input">
-                        <input type="date" id="endDate" class="form-input">
+                    <div class="date-range-inputs">
+                        <input type="date" id="startDate" class="form-input" title="Start date">
+                        <input type="date" id="endDate" class="form-input" title="End date">
                     </div>
                 </div>
             </div>
             
-            <div style="margin-top: 1rem; text-align: right;">
+            <div class="report-controls">
                 <button class="btn btn-primary" onclick="generateReport()">
                     Generate Report
                 </button>
@@ -103,7 +103,7 @@
                     </thead>
                     <tbody id="tableBody">
                         <tr>
-                            <td style="text-align: center; color: #6b7280; padding: 3rem;">
+                            <td class="table-empty-cell">
                                 No data to display
                             </td>
                         </tr>
