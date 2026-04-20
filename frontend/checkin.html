@@ -51,28 +51,25 @@
                     <span class="badge badge-present" id="statusBadge">Ready</span>
                 </div>
                 
-                <div class="camera-container" style="margin-bottom: 1rem; position: relative;">
+                <div class="camera-container card-margin-bottom">
                     <video 
                         id="video" 
                         class="camera-video" 
                         autoplay 
-                        playsinline
                         muted
-                        style="width: 100%; height: 100%; object-fit: cover;"
                     ></video>
                     <canvas 
                         id="overlay" 
                         class="camera-overlay"
-                        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;"
                     ></canvas>
-                    <div class="scan-line" id="scanLine" style="display: none;"></div>
+                    <div class="scan-line hidden" id="scanLine"></div>
                     
                     <div class="camera-controls">
                         <span class="camera-badge" id="matchStatus">Click Start Check-in</span>
                     </div>
                 </div>
                 
-                <div style="display: flex; gap: 0.75rem;">
+                <div class="button-group-row">
                     <button type="button" id="startBtn" class="btn btn-primary" onclick="startCheckIn()">
                         Start Check-in
                     </button>
@@ -83,19 +80,19 @@
             </div>
 
             <div>
-                <div class="card" style="margin-bottom: 1.5rem;">
+                <div class="card card-margin-bottom">
                     <h2 class="card-title">Select Session</h2>
                     
                     <div class="form-group">
                         <label class="form-label">Class</label>
-                        <select id="classSelect" class="form-select class-select" onchange="loadSessions()">
+                        <select id="classSelect" class="form-select class-select" title="Select class" onchange="loadSessions()">
                             <option value="">Select a class</option>
                         </select>
                     </div>
                     
                     <div class="form-group">
                         <label class="form-label">Session</label>
-                        <select id="sessionSelect" class="form-select" disabled>
+                        <select id="sessionSelect" class="form-select" title="Select session" disabled>
                             <option value="">Select a session</option>
                         </select>
                     </div>
@@ -103,8 +100,8 @@
 
                 <div class="card">
                     <h2 class="card-title">✓ Recent Check-ins</h2>
-                    <div id="recentCheckins" style="display: flex; flex-direction: column; gap: 0.75rem; max-height: 300px; overflow-y: auto;">
-                        <p style="color: #6b7280; text-align: center; padding: 1rem;">
+                    <div id="recentCheckins" class="recent-checkins">
+                        <p class="recent-checkins-empty">
                             No check-ins yet today
                         </p>
                     </div>
