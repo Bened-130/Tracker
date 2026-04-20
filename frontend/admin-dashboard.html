@@ -136,9 +136,16 @@
         }
 
         .stat-card .change {
-            color: #10b981;
             font-size: 0.875rem;
             margin-top: 0.5rem;
+        }
+
+        .stat-card .change-positive {
+            color: #10b981;
+        }
+
+        .stat-card .change-warning {
+            color: #f59e0b;
         }
 
         .section-title {
@@ -272,13 +279,13 @@
             <div class="card stat-card">
                 <div class="label">Total Paid</div>
                 <div class="value" id="totalPaid">$0.00</div>
-                <div class="change" style="color: #10b981;">+15% from last month</div>
+                <div class="change change-positive">+15% from last month</div>
             </div>
 
             <div class="card stat-card">
                 <div class="label">Pending</div>
                 <div class="value" id="totalPending">$0.00</div>
-                <div class="change" style="color: #f59e0b;">−5 students</div>
+                <div class="change change-warning">−5 students</div>
             </div>
 
             <div class="card stat-card">
