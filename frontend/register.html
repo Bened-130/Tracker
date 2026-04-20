@@ -66,7 +66,7 @@
                     
                     <div class="form-group">
                         <label class="form-label">Class</label>
-                        <select id="classId" class="form-select class-select">
+                        <select id="classId" class="form-select class-select" title="Select a class">
                             <option value="">Select a class</option>
                         </select>
                     </div>
@@ -75,26 +75,23 @@
 
             <div class="card">
                 <h2 class="card-title">Face Capture</h2>
-                <p style="color: #6b7280; font-size: 0.875rem; margin-bottom: 1rem;">
+                <p class="form-help-text">
                     Capture 5 photos from different angles for accurate recognition
                 </p>
                 
                 <!-- Camera Container -->
-                <div class="camera-container" style="margin-bottom: 1rem; position: relative;">
+                <div class="camera-container-wrap">
                     <video 
                         id="video" 
                         class="camera-video" 
                         autoplay 
-                        playsinline 
                         muted
-                        style="width: 100%; height: 100%; object-fit: cover;"
                     ></video>
                     <canvas 
                         id="overlay" 
                         class="camera-overlay"
-                        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;"
                     ></canvas>
-                    <div class="scan-line" id="scanLine" style="display: none;"></div>
+                    <div class="scan-line hidden" id="scanLine"></div>
                     
                     <div class="camera-controls">
                         <span class="camera-badge" id="captureCount">0 / 5 captured</span>
@@ -103,12 +100,12 @@
                 </div>
                 
                 <!-- Thumbnails -->
-                <div id="photoThumbnails" style="display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap; min-height: 90px;"></div>
+                <div id="photoThumbnails" class="photo-thumbnails"></div>
                 
                 <!-- Error Message -->
-                <div id="cameraError" style="color: #ef4444; font-size: 0.875rem; margin-bottom: 1rem; display: none;"></div>
+                <div id="cameraError" class="camera-error"></div>
                 
-                <div style="display: flex; gap: 0.75rem;">
+                <div class="camera-button-group">
                     <button type="button" id="startCameraBtn" class="btn btn-secondary" onclick="startCamera()">
                         Start Camera
                     </button>
@@ -119,7 +116,7 @@
             </div>
         </div>
 
-        <div class="card" style="text-align: right;">
+        <div class="card card-align-right">
             <button type="button" id="submitBtn" class="btn btn-success" onclick="submitRegistration()" disabled>
                 Complete Registration
             </button>
