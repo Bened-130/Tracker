@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, ScrollView, Alert } from "react-native";
-import { useAuthStore } from "../services/authStore";
+import { useAuthStore } from "../../services/authStore";
 import { GlassmorphicButton } from "../components/GlassmorphicUI";
 import { LinearGradient } from "expo-linear-gradient";
 
