@@ -1,7 +1,3 @@
--- ============================================================
--- BENEDICT ACADEMY - COMPLETE DATABASE SCHEMA
--- Includes: Students, Parents, Hostel, Library, Calendar
--- ============================================================
 
 -- 1. CORE TABLES (Existing)
 CREATE TABLE [dbo].[Classes]
