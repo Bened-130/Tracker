@@ -1,6 +1,7 @@
 import { classesHandler } from './classes.mjs';
 import { studentsHandler } from './students.mjs';
 import { attendanceHandler } from './attendance.mjs';
+import { adminHandler } from './admin.mjs';
 import { checkSupabaseConnection } from './utils/supabase.mjs';
 
 const headers = {
@@ -39,6 +40,9 @@ export const handler = async (event, context) => {
     }
     else if (endpoint === 'attendance') {
       result = await attendanceHandler(event);
+    }
+    else if (endpoint === 'admin') {
+      result = await adminHandler(event);
     }
     else {
       result = { statusCode: 404, body: JSON.stringify({ error: 'Not found' }) };
