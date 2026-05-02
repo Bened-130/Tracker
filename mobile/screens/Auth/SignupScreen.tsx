@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, ScrollView, Alert, Picker } from "react-native";
-import { useAuthStore } from "../services/authStore";
+import { View, Text, TextInput, TouchableOpacity, ScrollView, Alert } from "react-native";
+import { useAuthStore } from "../../services/authStore";
 import { GlassmorphicButton } from "../components/GlassmorphicUI";
 import { LinearGradient } from "expo-linear-gradient";
 
@@ -84,16 +84,18 @@ export const SignupScreen = ({ navigation }: any) => {
         {/* Role Selection */}
         <View className="mb-6">
           <Text className="text-white mb-2 font-semibold">Role</Text>
-          <View className="bg-white/10 border border-white/20 rounded-xl overflow-hidden">
-            <Picker
-              selectedValue={role}
-              onValueChange={(itemValue) => setRole(itemValue)}
-              style={{ color: "white" }}
-            >
-              {ROLES.map((r) => (
-                <Picker.Item key={r} label={r.charAt(0).toUpperCase() + r.slice(1)} value={r} />
-              ))}
-            </Picker>
+          <View className="flex-row justify-between gap-2">
+            {ROLES.map((r) => (
+              <TouchableOpacity
+                key={r}
+                onPress={() => setRole(r)}
+                className={`flex-1 rounded-xl border p-3 ${role === r ? "border-purple-400 bg-purple-500/20" : "border-white/20 bg-white/5"}`}
+              >
+                <Text className={`text-center font-bold ${role === r ? "text-white" : "text-gray-300"}`}>
+                  {r.charAt(0).toUpperCase() + r.slice(1)}
+                </Text>
+              </TouchableOpacity>
+            ))}
           </View>
         </View>
 
