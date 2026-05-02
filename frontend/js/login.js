@@ -294,10 +294,10 @@ function setupRoleBasedNavigation() {
 
     // Define role-specific accessible pages
     const ROLE_PAGES = {
-        admin: ['admin-dashboard', 'dashboard', 'reports'],
-        teacher: ['teacher-dashboard', 'dashboard', 'classes', 'reports', 'attendance'],
-        student: ['student-dashboard', 'student-checkin', 'checkin', 'dashboard'],
-        parent: ['parent-portal', 'reports', 'dashboard']
+        admin: ['admin-dashboard', 'dashboard', 'reports', 'admin-students', 'admin-hostel', 'admin-library', 'admin-calendar', 'admin-student-history', 'calendar'],
+        teacher: ['teacher-dashboard', 'dashboard', 'classes', 'reports', 'attendance', 'calendar'],
+        student: ['student-dashboard', 'student-checkin', 'checkin', 'dashboard', 'calendar'],
+        parent: ['parent-portal', 'reports', 'dashboard', 'calendar']
     };
 
     const allowedPages = ROLE_PAGES[userRole] || [];
