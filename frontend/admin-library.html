@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SchoolVibe Tracker - Library Management</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="css/styles.css" />
+    <style>
+        :root {
+            --primary: #6366f1;
+            --secondary: #8b5cf6;
+            --accent: #ec4899;
+            --dark-900: #111827;
+            --white: #ffffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--dark-900) 0%, #1a1a2e 100%);
+            color: var(--white);
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            text-decoration: none;
+            color: var(--white);
+            font-weight: 700;
+            font-size: 1.25rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 1rem;
+            list-style: none;
+            flex-wrap: wrap;
+        }
+
+        .nav-link {
+            color: #9ca3af;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            color: var(--primary);
+        }
+
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            margin-bottom: 2.5rem;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: #9ca3af;
+            font-size: 1.1rem;
+        }
+
+        .grid-layout {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1.75rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 1.5rem;
+            padding: 1.75rem;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-grid .form-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        label {
+            font-weight: 600;
+            color: #d1d5db;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 0.9rem 1rem;
+            border-radius: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--white);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.95rem 1.5rem;
+            border-radius: 1rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: var(--white);
+            border: none;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--white);
+        }
+
+        .table-container {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 1.5rem;
+            overflow: hidden;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        th {
+            background: rgba(99, 102, 241, 0.1);
+            font-size: 0.85rem;
+            letter-spacing: 0.06em;
+            color: #9ca3af;
+            text-transform: uppercase;
+        }
+
+        td {
+            color: #e5e7eb;
+        }
+
+        .badge {
+            display: inline-flex;
+            border-radius: 999px;
+            padding: 0.35rem 0.8rem;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .badge-borrowed {
+            background: rgba(245, 158, 11, 0.18);
+            color: #f59e0b;
+        }
+
+        .badge-available {
+            background: rgba(16, 185, 129, 0.18);
+            color: #10b981;
+        }
+
+        @media (max-width: 900px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .nav-container {
+                padding: 0 1rem;
+            }
+
+            .main-container {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="nav-brand">SchoolVibe</a>
+            <ul class="nav-links">
+                <li><a href="admin-dashboard.html" class="nav-link">Dashboard</a></li>
+                <li><a href="admin-hostel.html" class="nav-link">Hostel</a></li>
+                <li><a href="admin-library.html" class="nav-link active">Library</a></li>
+                <li><a href="admin-student-history.html" class="nav-link">Student History</a></li>
+                <li><a href="admin-calendar.html" class="nav-link">Calendar</a></li>
+                <li><a href="calendar.html" class="nav-link">School Calendar</a></li>
+                <li><a href="index.html" class="nav-link">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        <div class="header">
+            <h1>Library Management</h1>
+            <p>Track books, borrowed items, and library history for students.</p>
+        </div>
+
+        <div class="grid-layout">
+            <div class="card">
+                <div class="section-title">Total Books</div>
+                <div id="libraryTotalBooks"></div>
+            </div>
+            <div class="card">
+                <div class="section-title">Borrowed Today</div>
+                <div id="libraryBorrowedCount"></div>
+            </div>
+            <div class="card">
+                <div class="section-title">Available Copies</div>
+                <div id="libraryAvailableCount"></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="section-title">Register New Book</div>
+            <form id="libraryBookForm">
+                <div class="form-grid">
+                    <div class="form-item">
+                        <label for="bookTitle">Title</label>
+                        <input id="bookTitle" type="text" placeholder="Book title" required />
+                    </div>
+                    <div class="form-item">
+                        <label for="bookAuthor">Author</label>
+                        <input id="bookAuthor" type="text" placeholder="Author" required />
+                    </div>
+                    <div class="form-item">
+                        <label for="bookCopies">Copies</label>
+                        <input id="bookCopies" type="number" min="1" value="1" required />
+                    </div>
+                    <div class="form-item">
+                        <label for="bookCategory">Category</label>
+                        <input id="bookCategory" type="text" placeholder="Category" required />
+                    </div>
+                </div>
+                <button type="submit" class="btn">Add Book</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <div class="section-title">Log Borrowed Book</div>
+            <form id="borrowBookForm">
+                <div class="form-grid">
+                    <div class="form-item">
+                        <label for="borrowStudentName">Student Name</label>
+                        <input id="borrowStudentName" type="text" placeholder="Student full name" required />
+                    </div>
+                    <div class="form-item">
+                        <label for="borrowBookSelect">Book</label>
+                        <select id="borrowBookSelect"></select>
+                    </div>
+                    <div class="form-item">
+                        <label for="borrowDate">Borrow Date</label>
+                        <input id="borrowDate" type="date" required />
+                    </div>
+                    <div class="form-item">
+                        <label for="returnDate">Due Date</label>
+                        <input id="returnDate" type="date" required />
+                    </div>
+                </div>
+                <button type="submit" class="btn">Log Borrow</button>
+            </form>
+        </div>
+
+        <div class="section-title">Books In Library</div>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Author</th>
+                        <th>Copies</th>
+                        <th>Category</th>
+                    </tr>
+                </thead>
+                <tbody id="libraryBooksBody"></tbody>
+            </table>
+        </div>
+
+        <div class="section-title">Borrowed Books</div>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Title</th>
+                        <th>Borrowed</th>
+                        <th>Due</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="libraryBorrowsBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/login.js"></script>
+    <script src="js/adminModules.js"></script>
+    <script>
+        requireRole('admin');
+        document.addEventListener('DOMContentLoaded', loadLibraryPage);
+    </script>
+</body>
+</html>
