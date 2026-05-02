@@ -28,6 +28,16 @@ const api = {
   getFinancialSummary: () => call('/admin/financial-summary'),
   getAllStudents: () => call('/admin/students'),
   getNotifications: () => call('/admin/notifications'),
+  getHostelBlocks: () => call('/admin/hostel/blocks'),
+  getHostelBookings: () => call('/admin/hostel/bookings'),
+  createHostelBooking: (data) => call('/admin/hostel/bookings', { method: 'POST', body: JSON.stringify(data) }),
+  getLibraryBooks: () => call('/admin/library/books'),
+  getLibraryBorrows: () => call('/admin/library/borrows'),
+  createLibraryBook: (data) => call('/admin/library/books', { method: 'POST', body: JSON.stringify(data) }),
+  createLibraryBorrow: (data) => call('/admin/library/borrows', { method: 'POST', body: JSON.stringify(data) }),
+  getCalendarEvents: () => call('/admin/calendar/events'),
+  createCalendarEvent: (data) => call('/admin/calendar/events', { method: 'POST', body: JSON.stringify(data) }),
+  getStudentHistory: (studentId) => call(`/admin/students/history/${studentId}`),
 
   // Teacher endpoints
   getTeacherAssignments: (teacherId) => call(`/teacher/${teacherId}/assignments`),
