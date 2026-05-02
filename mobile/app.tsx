@@ -12,6 +12,12 @@ import { SignupScreen } from "./screens/Auth/SignupScreen";
 
 // Admin Screens
 import { AdminDashboardScreen } from "./screens/Admin/AdminDashboardScreen";
+import { HostelScreen } from "./screens/Admin/HostelScreen";
+import { LibraryScreen } from "./screens/Admin/LibraryScreen";
+import { StudentHistoryScreen } from "./screens/Admin/StudentHistoryScreen";
+
+// Shared Screens
+import { CalendarScreen } from "./screens/Shared/CalendarScreen";
 
 // Student Screens
 import { StudentFaceAuthScreen } from "./screens/Student/StudentFaceAuthScreen";
@@ -71,6 +77,38 @@ const AdminTabs = () => {
           tabBarLabel: "Dashboard",
         }}
       />
+      <Tab.Screen
+        name="Hostel"
+        component={HostelScreen}
+        options={{
+          title: "Hostel",
+          tabBarLabel: "Hostel",
+        }}
+      />
+      <Tab.Screen
+        name="Library"
+        component={LibraryScreen}
+        options={{
+          title: "Library",
+          tabBarLabel: "Library",
+        }}
+      />
+      <Tab.Screen
+        name="StudentHistory"
+        component={StudentHistoryScreen}
+        options={{
+          title: "History",
+          tabBarLabel: "History",
+        }}
+      />
+      <Tab.Screen
+        name="AdminCalendar"
+        component={CalendarScreen}
+        options={{
+          title: "Calendar",
+          tabBarLabel: "Calendar",
+        }}
+      />
     </Tab.Navigator>
   );
 };
@@ -112,6 +150,14 @@ const StudentTabs = () => {
         options={{
           title: "My Grades",
           tabBarLabel: "Grades",
+        }}
+      />
+      <Tab.Screen
+        name="Calendar"
+        component={CalendarScreen}
+        options={{
+          title: "Calendar",
+          tabBarLabel: "Calendar",
         }}
       />
     </Tab.Navigator>
@@ -158,6 +204,14 @@ const ParentTabs = () => {
         }}
         initialParams={{ teacherId: "" }}
       />
+      <Tab.Screen
+        name="Calendar"
+        component={CalendarScreen}
+        options={{
+          title: "Calendar",
+          tabBarLabel: "Calendar",
+        }}
+      />
     </Tab.Navigator>
   );
 };
@@ -191,6 +245,14 @@ const TeacherTabs = () => {
         options={{
           title: "Assignments",
           tabBarLabel: "Assignments",
+        }}
+      />
+      <Tab.Screen
+        name="Calendar"
+        component={CalendarScreen}
+        options={{
+          title: "Calendar",
+          tabBarLabel: "Calendar",
         }}
       />
     </Tab.Navigator>
